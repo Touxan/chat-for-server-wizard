@@ -103,8 +103,8 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+});
 
 Sidebar.displayName = "Sidebar";
 
