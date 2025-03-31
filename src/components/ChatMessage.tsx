@@ -14,30 +14,30 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
   return (
     <div
       className={cn(
-        "flex items-start mb-6",
+        "flex items-start mb-5",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       {!isUser && (
         <div className="flex-shrink-0 mr-3">
-          <Avatar className="h-8 w-8 bg-[#1A2B42]">
+          <Avatar className="h-9 w-9 bg-[hsl(var(--header-bg))] ring-2 ring-[hsl(var(--chat-bubble-bot-border))] ring-offset-2 ring-offset-[hsl(var(--chat-bg))]">
             <BotIcon className="h-5 w-5 text-white" />
           </Avatar>
         </div>
       )}
       <div
         className={cn(
-          "max-w-[80%] rounded-lg p-4",
+          "max-w-[80%] rounded-xl p-4 shadow-sm",
           isUser
-            ? "bg-[#38B2AC] text-white rounded-br-none"
-            : "bg-white border border-gray-200 rounded-bl-none"
+            ? "bg-[hsl(var(--chat-bubble-user))] text-white rounded-br-none"
+            : "bg-[hsl(var(--chat-bubble-bot))] border border-[hsl(var(--chat-bubble-bot-border))] dark:text-gray-100 rounded-bl-none"
         )}
       >
-        <div className="whitespace-pre-wrap mb-1">{message}</div>
+        <div className="whitespace-pre-wrap mb-1 text-sm">{message}</div>
         <div
           className={cn(
             "text-xs",
-            isUser ? "text-gray-100" : "text-gray-500"
+            isUser ? "text-white/80" : "text-gray-500 dark:text-gray-400"
           )}
         >
           {timestamp}
@@ -45,8 +45,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
       </div>
       {isUser && (
         <div className="flex-shrink-0 ml-3">
-          <Avatar className="h-8 w-8 bg-gray-300">
-            <User className="h-5 w-5 text-gray-600" />
+          <Avatar className="h-9 w-9 bg-[hsl(var(--chat-bubble-user))] ring-2 ring-[hsl(var(--chat-bubble-user)/80] ring-offset-2 ring-offset-[hsl(var(--chat-bg))]">
+            <User className="h-5 w-5 text-white" />
           </Avatar>
         </div>
       )}
