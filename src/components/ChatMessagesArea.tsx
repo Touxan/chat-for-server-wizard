@@ -26,7 +26,7 @@ const ChatMessagesArea = ({
       <div className="max-w-4xl mx-auto w-full p-4">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground py-8">
-            Démarrez une nouvelle conversation...
+            Start a new conversation...
           </div>
         )}
 
@@ -60,7 +60,7 @@ const ChatMessagesArea = ({
             </div>
             <div className="msg-bubble msg-bubble-bot p-3">
               <div className="flex space-x-2 items-center">
-                <span className="text-[hsl(var(--primary))]">Agent en train d'écrire</span>
+                <span className="text-[hsl(var(--primary))]">Agent typing</span>
                 <span className="typing-animation">
                   <span className="dot"></span>
                   <span className="dot"></span>

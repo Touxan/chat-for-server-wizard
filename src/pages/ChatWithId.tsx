@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useCallback } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
@@ -35,13 +35,17 @@ const ChatWithId = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change or when bot starts/stops typing
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     const chatContainer = document.getElementById("chat-scroll-area");
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isBotTyping]);
+  }, [messagesEndRef]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isBotTyping, scrollToBottom]);
 
   // Redirect to authentication page if user is not logged in
   if (!isAuthLoading && !user) {

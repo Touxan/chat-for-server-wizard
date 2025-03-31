@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -26,7 +26,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
   const { generateBotResponse } = useBotResponseGenerator();
 
   // Function to fetch messages from a conversation
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
     if (!conversationId || !user) return;
     
     setIsLoading(true);
@@ -60,7 +60,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [conversationId, user, navigate, toast]);
 
   const handleSendMessage = async (message: string) => {
     if (!conversationId || !user) return;
@@ -86,8 +86,18 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       // Get bot response from the API
       const { botContent, command } = await generateBotResponse(message);
       
-      // Add bot response to the database
-      await sendBotResponse(conversationId, botContent, command);
+      // Add bot response to the database and update local state
+      const botMessage = await sendBotResponse(conversationId, botContent, command);
+      
+      // Update local state with the bot response
+      if (botMessage) {
+        const botMessageConverted = convertToMessageType(botMessage);
+        setMessages(prev => [
+          ...prev.filter(msg => msg.id !== tempUserMsgId), // Remove temp user message
+          convertToMessageType(userMessage), // Add real user message
+          botMessageConverted // Add bot response
+        ]);
+      }
       
       // Hide bot typing indicator when response is received
       setIsBotTyping(false);
@@ -110,7 +120,14 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       if (!messageToUpdate || !messageToUpdate.command) return;
       
       const updatedContent = `${messageToUpdate.content}\n\nCommand executed successfully: ${messageToUpdate.command.text}`;
-      await updateMessageAfterCommand(messageId, updatedContent);
+      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
+      
+      // Update the message in local state immediately
+      if (updatedMessage) {
+        setMessages(prev => 
+          prev.map(msg => msg.id === messageId ? convertToMessageType(updatedMessage) : msg)
+        );
+      }
     } catch (error: any) {
       console.error("Error approving command:", error);
       toast({
@@ -129,7 +146,14 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       if (!messageToUpdate || !messageToUpdate.command) return;
       
       const updatedContent = `${messageToUpdate.content}\n\nCommand execution cancelled.`;
-      await updateMessageAfterCommand(messageId, updatedContent);
+      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
+      
+      // Update the message in local state immediately
+      if (updatedMessage) {
+        setMessages(prev => 
+          prev.map(msg => msg.id === messageId ? convertToMessageType(updatedMessage) : msg)
+        );
+      }
     } catch (error: any) {
       console.error("Error declining command:", error);
       toast({
@@ -145,7 +169,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     if (conversationId && user) {
       fetchMessages();
     }
-  }, [conversationId, user]);
+  }, [conversationId, user, fetchMessages]);
 
   // Listen for real-time updates to messages
   useEffect(() => {
@@ -170,7 +194,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       if (messageChannel) supabase.removeChannel(messageChannel);
       if (conversationsChannel) supabase.removeChannel(conversationsChannel);
     };
-  }, [conversationId, user, navigate]);
+  }, [conversationId, user, navigate, toast, fetchMessages]);
 
   return {
     messages,
