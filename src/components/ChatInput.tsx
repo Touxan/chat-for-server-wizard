@@ -25,13 +25,13 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white border-t border-gray-200 p-4">
+    <form onSubmit={handleSubmit} className="bg-white p-4">
       <div className="flex items-end space-x-2">
         <Textarea
           placeholder="Ask about your servers... (or use voice input)"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="min-h-[50px] resize-none"
+          className="min-h-[50px] resize-none flex-1"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

@@ -34,6 +34,7 @@ const Chat = () => {
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -170,6 +171,7 @@ const Chat = () => {
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   return (
@@ -187,36 +189,42 @@ const Chat = () => {
         />
       )}
       
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMwLTkuOTQtOC4wNi0xOC0xOC0xOFYwaDQydjQySDM2VjE4eiIgZmlsbD0iI2VlZjJmNiIgZmlsbC1vcGFjaXR5PSIwLjQiLz48cGF0aCBkPSJNMzAgMzBjMC05Ljk0LTguMDYtMTgtMTgtMThWMTJoMzZ2MzZIMzBWMzB6IiBmaWxsPSIjZWVmMmY2IiBmaWxsLW9wYWNpdHk9IjAuNCIvPjxwYXRoIGQ9Ik0yNCA0MmMwLTkuOTQtOC4wNi0xOC0xOC0xOHYtNmgzNnY0MkgyNFY0MnoiIGZpbGw9IiNlZWYyZjYiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9nPjwvc3ZnPg==')] opacity-30 z-0"></div>
-        <ScrollArea id="chat-scroll-area" className="flex-1 p-4 z-10">
-          <div className="max-w-4xl mx-auto w-full">
-            {messages.map((msg) => (
-              <div key={msg.id} className="animate-fade-in">
-                <ChatMessage
-                  message={msg.content}
-                  isUser={msg.isUser}
-                  timestamp={msg.timestamp}
-                />
-                {msg.command && (
-                  <div className="ml-11 mb-6">
-                    <CommandBlock
-                      command={msg.command.text}
-                      description={msg.command.description}
-                      risk={msg.command.risk}
-                      onApprove={() => handleApproveCommand(msg.id)}
-                      onDecline={() => handleDeclineCommand(msg.id)}
-                    />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
         
-        <div className="max-w-4xl mx-auto w-full px-4 pb-4">
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100">
-            <ChatInput onSendMessage={handleSendMessage} />
+        {/* Chat area with flex-1 to take available space */}
+        <div className="flex-1 flex flex-col min-h-0">
+          <ScrollArea id="chat-scroll-area" className="flex-1">
+            <div className="max-w-4xl mx-auto w-full p-4">
+              {messages.map((msg) => (
+                <div key={msg.id} className="animate-fade-in">
+                  <ChatMessage
+                    message={msg.content}
+                    isUser={msg.isUser}
+                    timestamp={msg.timestamp}
+                  />
+                  {msg.command && (
+                    <div className="ml-11 mb-6">
+                      <CommandBlock
+                        command={msg.command.text}
+                        description={msg.command.description}
+                        risk={msg.command.risk}
+                        onApprove={() => handleApproveCommand(msg.id)}
+                        onDecline={() => handleDeclineCommand(msg.id)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+          </ScrollArea>
+          
+          {/* Chat input positioned at the bottom with padding and fixed height */}
+          <div className="w-full p-4 pb-4">
+            <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100">
+              <ChatInput onSendMessage={handleSendMessage} />
+            </div>
           </div>
         </div>
       </div>
@@ -225,3 +233,4 @@ const Chat = () => {
 };
 
 export default Chat;
+
