@@ -33,6 +33,30 @@ export const useBotResponseGenerator = () => {
       try {
         const data = JSON.parse(responseText);
         
+        // Handle the new response format which uses "output" field
+        if (data.output) {
+          // Extract potential command from the output if present
+          let command = null;
+          
+          // Check if there's command information in the response
+          // This is a fallback in case commands are added in the future
+          if (data.command) {
+            command = {
+              text: String(data.command.text || ''),
+              description: String(data.command.description || ''),
+              risk: ['low', 'medium', 'high'].includes(data.command.risk) 
+                ? data.command.risk 
+                : 'medium'
+            };
+          }
+          
+          return {
+            botContent: data.output,
+            command: command
+          };
+        }
+        
+        // Fallback to the previous format handling
         // Ensure command is properly formatted if it exists
         let command = null;
         if (data.command) {
@@ -51,11 +75,9 @@ export const useBotResponseGenerator = () => {
         };
       } catch (parseError) {
         console.error("Error parsing JSON response:", parseError);
-        // If JSON parsing fails, return the raw text if possible
+        // If JSON parsing fails, return an error message
         return {
-          botContent: responseText.length > 500 ? 
-            "I received a response but couldn't process it correctly." : 
-            responseText,
+          botContent: "An error occurred while processing your request.",
           command: null
         };
       }
