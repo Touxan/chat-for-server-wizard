@@ -19,7 +19,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           variant="ghost" 
           size="icon" 
           onClick={toggleSidebar} 
-          className="text-[hsl(var(--header-text))] hover:bg-[hsl(var(--header-accent))] mr-3"
+          className="text-[hsl(var(--header-text))] hover:bg-[hsl(var(--header-accent))] mr-3 rounded-full"
         >
           <Menu size={22} />
         </Button>
