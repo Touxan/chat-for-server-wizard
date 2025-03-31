@@ -81,21 +81,35 @@ export const useConversations = () => {
     if (!user) return false;
     
     try {
+      console.log(`Attempting to delete conversation with ID: ${id}`);
+      
       // Delete messages associated with the conversation first
-      const { error: messagesError } = await supabase
+      const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
         .delete()
-        .eq('conversation_id', id);
+        .eq('conversation_id', id)
+        .select();
       
-      if (messagesError) throw messagesError;
+      if (messagesError) {
+        console.error('Error deleting messages:', messagesError);
+        throw messagesError;
+      }
+      
+      console.log(`Deleted ${messagesData?.length || 0} messages`);
       
       // Then delete the conversation
-      const { error } = await supabase
+      const { data: conversationData, error: conversationError } = await supabase
         .from('conversations')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
         
-      if (error) throw error;
+      if (conversationError) {
+        console.error('Error deleting conversation:', conversationError);
+        throw conversationError;
+      }
+      
+      console.log('Deleted conversation:', conversationData);
       
       // Update local state
       setConversations(prev => prev.filter(conv => conv.id !== id));
@@ -166,6 +180,7 @@ export const useConversations = () => {
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
+          console.log('Real-time conversation update:', payload);
           fetchConversations();
         }
       )

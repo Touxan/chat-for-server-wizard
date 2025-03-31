@@ -23,6 +23,30 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     command: message.command,
   });
 
+  // Function to check if the conversation exists
+  const checkConversationExists = async (): Promise<boolean> => {
+    if (!conversationId || !user) return false;
+    
+    try {
+      console.log(`Checking if conversation ${conversationId} exists`);
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .maybeSingle();
+        
+      if (error) {
+        console.error('Error checking conversation existence:', error);
+        throw error;
+      }
+      
+      return !!data;
+    } catch (error) {
+      console.error('Error checking conversation:', error);
+      return false;
+    }
+  };
+
   // Function to fetch messages from a conversation
   const fetchMessages = async () => {
     if (!conversationId || !user) return;
@@ -30,19 +54,14 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     setIsLoading(true);
     try {
       // First check if the conversation exists
-      const { data: conversationData, error: conversationError } = await supabase
-        .from('conversations')
-        .select('id')
-        .eq('id', conversationId)
-        .maybeSingle();
-        
-      if (conversationError) throw conversationError;
+      const conversationExists = await checkConversationExists();
       
       // If conversation doesn't exist, redirect to main chat page
-      if (!conversationData) {
+      if (!conversationExists) {
+        console.log(`Conversation ${conversationId} does not exist, redirecting to /chat`);
         toast({
           variant: "destructive",
-          title: "Error",
+          title: "Conversation Not Found",
           description: "This conversation no longer exists.",
         });
         navigate('/chat');
@@ -221,6 +240,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
           filter: `conversation_id=eq.${conversationId}`,
         },
         (payload) => {
+          console.log('Real-time message update:', payload);
           fetchMessages();
         }
       )
@@ -237,7 +257,8 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
           table: 'conversations',
           filter: `id=eq.${conversationId}`,
         },
-        () => {
+        (payload) => {
+          console.log('Conversation deleted:', payload);
           toast({
             variant: "destructive",
             title: "Conversation Deleted",
