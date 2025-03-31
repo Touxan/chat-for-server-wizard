@@ -70,13 +70,13 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                 <Collapsible key={index} defaultOpen={index < 2}>
                   <div className="flex items-center mb-1">
                     <CollapsibleTrigger className="flex items-center w-full text-sm text-gray-300 hover:text-white">
-                      {({ open }) => (
-                        <>
-                          {open ? <ChevronDown className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 mr-1" />}
-                          <FolderIcon className="h-4 w-4 mr-2" />
-                          <span>{group.title}</span>
-                        </>
-                      )}
+                      {/* Fix: Use a React element instead of a function that returns an element */}
+                      <span className="flex items-center w-full">
+                        <ChevronDown className="h-4 w-4 mr-1 group-data-[state=closed]:hidden group-data-[state=open]:block" />
+                        <ChevronRight className="h-4 w-4 mr-1 group-data-[state=closed]:block group-data-[state=open]:hidden" />
+                        <FolderIcon className="h-4 w-4 mr-2" />
+                        <span>{group.title}</span>
+                      </span>
                     </CollapsibleTrigger>
                   </div>
                   
