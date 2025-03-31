@@ -20,21 +20,21 @@ export function UserButton() {
           </div>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-[hsl(var(--popover))] border-[hsl(var(--border))] font-mono" align="end" forceMount>
-        <DropdownMenuLabel className="text-[hsl(var(--foreground))]">user@server:~</DropdownMenuLabel>
+      <DropdownMenuContent className="w-56 bg-[hsl(var(--popover))] border-[hsl(var(--border))]" align="end" forceMount>
+        <DropdownMenuLabel className="text-[hsl(var(--foreground))]">My Account</DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-[hsl(var(--border))]" />
         <DropdownMenuItem className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]">
           <User className="mr-2 h-4 w-4" />
-          <span>./profile.sh</span>
+          <span>Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]">
           <Settings className="mr-2 h-4 w-4" />
-          <span>./settings.sh</span>
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-[hsl(var(--border))]" />
         <DropdownMenuItem className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]">
           <LogOut className="mr-2 h-4 w-4" />
-          <span>logout</span>
+          <span>Log out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
