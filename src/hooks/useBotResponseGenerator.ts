@@ -1,42 +1,38 @@
 
 /**
  * Generate a bot response based on user message
- * This hook extracts the AI response logic from the useChatMessages hook
+ * This hook makes an API call to get a response from the agent
  */
 export const useBotResponseGenerator = () => {
-  const generateBotResponse = (message: string) => {
-    let botContent = "";
-    let command = null;
-    
-    if (message.toLowerCase().includes("restart") || message.toLowerCase().includes("redémarrer")) {
-      botContent = "I can help you restart your server. Here's the command I recommend:";
-      command = {
-        text: "sudo systemctl restart nginx",
-        description: "This command will restart the NGINX web server without affecting other services.",
-        risk: "low" as const,
+  const generateBotResponse = async (message: string) => {
+    try {
+      const response = await fetch("https://sup-n8n.unipile.com/webhook/fa9cedbd-a97f-40d1-aea0-be886097d07c", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ message })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return {
+        botContent: data.message || data.response || "Je n'ai pas compris votre demande.",
+        command: data.command || null
       };
-    } else if (message.toLowerCase().includes("update") || message.toLowerCase().includes("mise à jour")) {
-      botContent = "I can help you update your system. Here's the recommended command:";
-      command = {
-        text: "sudo apt update && sudo apt upgrade -y",
-        description: "This command will update the package list and upgrade all installed packages to their latest versions.",
-        risk: "medium" as const,
+    } catch (error) {
+      console.error("Error generating bot response:", error);
+      return {
+        botContent: "Désolé, je rencontre des difficultés à traiter votre demande en ce moment.",
+        command: null
       };
-    } else if (message.toLowerCase().includes("delete") || message.toLowerCase().includes("supprimer")) {
-      botContent = "I understand that you want to delete something. Please be careful with this command:";
-      command = {
-        text: "sudo rm -rf /var/log/old_logs/",
-        description: "This command will recursively delete all files in the old_logs directory. Make sure you no longer need these files.",
-        risk: "high" as const,
-      };
-    } else {
-      botContent = "I'm analyzing your request. Could you provide more details about what you'd like to do with your Scaleway servers?";
     }
-    
-    return { botContent, command };
   };
 
   return {
-    generateBotResponse,
+    generateBotResponse
   };
 };

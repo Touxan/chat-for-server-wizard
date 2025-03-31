@@ -17,6 +17,7 @@ const ChatWithId = () => {
   const {
     messages,
     isLoading: isMessagesLoading,
+    isBotTyping,
     handleSendMessage,
     handleApproveCommand,
     handleDeclineCommand
@@ -33,14 +34,14 @@ const ChatWithId = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change or when bot starts/stops typing
   useEffect(() => {
     const chatContainer = document.getElementById("chat-scroll-area");
     if (chatContainer) {
       chatContainer.scrollTop = chatContainer.scrollHeight;
     }
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, isBotTyping]);
 
   // Redirect to authentication page if user is not logged in
   if (!isAuthLoading && !user) {
@@ -74,6 +75,7 @@ const ChatWithId = () => {
               onApproveCommand={handleApproveCommand}
               onDeclineCommand={handleDeclineCommand}
               messagesEndRef={messagesEndRef}
+              isBotTyping={isBotTyping}
             />
             
             <ChatInputWrapper onSendMessage={handleSendMessage} />

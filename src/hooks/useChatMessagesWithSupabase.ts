@@ -19,6 +19,7 @@ import { useBotResponseGenerator } from "@/hooks/useBotResponseGenerator";
 export const useChatMessagesWithSupabase = (conversationId?: string) => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBotTyping, setIsBotTyping] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -48,14 +49,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       const data = await fetchMessagesForConversation(conversationId);
 
       const convertedMessages = data?.map(convertToMessageType) || [];
-      setMessages(convertedMessages.length > 0 ? convertedMessages : [
-        {
-          id: "welcome",
-          content: "Hello! I'm your Server Wizard assistant for Scaleway. I can help you manage your servers by creating and executing commands with your approval. How can I help you today?",
-          isUser: false,
-          timestamp: "Just now",
-        },
-      ]);
+      setMessages(convertedMessages);
     } catch (error: any) {
       console.error("Error fetching messages:", error);
       toast({
@@ -72,17 +66,34 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     if (!conversationId || !user) return;
     
     try {
-      // Add user message
-      await sendUserMessage(conversationId, message);
+      // Add user message to local state immediately for instant feedback
+      const tempUserMsgId = `temp-${Date.now()}`;
+      const tempUserMsg: MessageType = {
+        id: tempUserMsgId,
+        content: message,
+        isUser: true,
+        timestamp: new Date().toLocaleTimeString(),
+      };
       
-      // Simulate bot response
-      setTimeout(async () => {
-        const { botContent, command } = generateBotResponse(message);
-        await sendBotResponse(conversationId, botContent, command);
-      }, 1000);
+      setMessages(prev => [...prev, tempUserMsg]);
       
+      // Actually add user message to the database
+      const userMessage = await sendUserMessage(conversationId, message);
+      
+      // Show bot typing indicator
+      setIsBotTyping(true);
+      
+      // Get bot response from the API
+      const { botContent, command } = await generateBotResponse(message);
+      
+      // Add bot response to the database
+      await sendBotResponse(conversationId, botContent, command);
+      
+      // Hide bot typing indicator when response is received
+      setIsBotTyping(false);
     } catch (error: any) {
       console.error("Error sending message:", error);
+      setIsBotTyping(false);
       toast({
         variant: "destructive",
         title: "Error",
@@ -164,6 +175,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
   return {
     messages,
     isLoading,
+    isBotTyping,
     handleSendMessage,
     handleApproveCommand,
     handleDeclineCommand,
