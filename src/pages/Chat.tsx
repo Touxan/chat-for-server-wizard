@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
@@ -48,16 +47,12 @@ const Chat = () => {
     }
   };
 
-  // Close sidebar when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Check if click is outside both sidebar and burger menu button
       if (
         sidebarRef.current && 
         !sidebarRef.current.contains(event.target as Node) &&
-        // Don't close when clicking on the overlay as it already handles close
         overlayRef.current !== event.target &&
-        // Make sure we're not selecting any element inside the overlay
         !overlayRef.current?.contains(event.target as Node)
       ) {
         closeSidebar();
@@ -71,7 +66,6 @@ const Chat = () => {
   }, [isSidebarOpen]);
 
   const handleSendMessage = (message: string) => {
-    // Add user message
     const newUserMessage: MessageType = {
       id: `user-${Date.now()}`,
       content: message,
@@ -81,9 +75,7 @@ const Chat = () => {
     
     setMessages((prev) => [...prev, newUserMessage]);
 
-    // Simulate AI response with a delay
     setTimeout(() => {
-      // Example responses based on keywords in the message
       let botResponse: MessageType;
       
       if (message.toLowerCase().includes("restart") || message.toLowerCase().includes("reboot")) {
@@ -165,7 +157,6 @@ const Chat = () => {
     );
   };
 
-  // Scroll to bottom effect
   useEffect(() => {
     const chatContainer = document.getElementById("chat-scroll-area");
     if (chatContainer) {
@@ -180,7 +171,6 @@ const Chat = () => {
       
       <Sidebar ref={sidebarRef} isOpen={isSidebarOpen} />
       
-      {/* Overlay when sidebar is open on mobile */}
       {isOverlayVisible && (
         <div 
           ref={overlayRef}
@@ -192,8 +182,7 @@ const Chat = () => {
       <div className="flex-1 flex flex-col relative overflow-hidden">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMwLTkuOTQtOC4wNi0xOC0xOC0xOFYwaDQydjQySDM2VjE4eiIgZmlsbD0iI2VlZjJmNiIgZmlsbC1vcGFjaXR5PSIwLjQiLz48cGF0aCBkPSJNMzAgMzBjMC05Ljk0LTguMDYtMTgtMTgtMThWMTJoMzZ2MzZIMzBWMzB6IiBmaWxsPSIjZWVmMmY2IiBmaWxsLW9wYWNpdHk9IjAuNCIvPjxwYXRoIGQ9Ik0yNCA0MmMwLTkuOTQtOC4wNi0xOC0xOC0xOHYtNmgzNnY0MkgyNFY0MnoiIGZpbGw9IiNlZWYyZjYiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9nPjwvc3ZnPg==')] opacity-30 z-0"></div>
         
-        {/* Chat area with flex-1 to take available space */}
-        <div className="flex-1 flex flex-col min-h-0">
+        <div className="flex-1 flex flex-col h-full">
           <ScrollArea id="chat-scroll-area" className="flex-1">
             <div className="max-w-4xl mx-auto w-full p-4">
               {messages.map((msg) => (
@@ -220,8 +209,7 @@ const Chat = () => {
             </div>
           </ScrollArea>
           
-          {/* Chat input positioned at the bottom with padding and fixed height */}
-          <div className="w-full p-4 pb-4">
+          <div className="sticky bottom-0 w-full p-4 z-10 bg-gradient-to-b from-transparent via-[#eef2f6]/80 to-[#eef2f6]">
             <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100">
               <ChatInput onSendMessage={handleSendMessage} />
             </div>
@@ -233,4 +221,3 @@ const Chat = () => {
 };
 
 export default Chat;
-

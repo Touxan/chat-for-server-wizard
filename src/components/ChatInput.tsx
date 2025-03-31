@@ -25,8 +25,8 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4">
-      <div className="flex items-end space-x-2">
+    <form onSubmit={handleSubmit} className="bg-white p-4 w-full">
+      <div className="flex items-end space-x-2 w-full">
         <Textarea
           placeholder="Ask about your servers... (or use voice input)"
           value={message}
