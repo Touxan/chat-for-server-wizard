@@ -17,7 +17,7 @@ export const useConversations = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  // Fonction pour récupérer les conversations
+  // Function to fetch conversations
   const fetchConversations = async () => {
     if (!user) return;
     
@@ -35,15 +35,15 @@ export const useConversations = () => {
       console.error('Error fetching conversations:', error);
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: 'Impossible de récupérer les conversations.',
+        title: 'Error',
+        description: 'Unable to retrieve conversations.',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fonction pour ajouter une nouvelle conversation
+  // Function to add a new conversation
   const addConversation = async (title: string) => {
     if (!user) return null;
     
@@ -51,7 +51,7 @@ export const useConversations = () => {
       const newConversation = {
         user_id: user.id,
         title,
-        category: 'Today', // Par défaut
+        category: 'Today', // Default
       };
 
       const { data, error } = await supabase
@@ -62,21 +62,62 @@ export const useConversations = () => {
 
       if (error) throw error;
 
-      // Mise à jour de l'état local
+      // Update local state
       setConversations(prev => [data as Conversation, ...prev]);
       return data as Conversation;
     } catch (error: any) {
       console.error('Error adding conversation:', error);
       toast({
         variant: 'destructive',
-        title: 'Erreur',
-        description: 'Impossible de créer une nouvelle conversation.',
+        title: 'Error',
+        description: 'Unable to create a new conversation.',
       });
       return null;
     }
   };
+  
+  // Function to delete a conversation
+  const deleteConversation = async (id: string) => {
+    if (!user) return false;
+    
+    try {
+      // Delete messages associated with the conversation first
+      const { error: messagesError } = await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', id);
+      
+      if (messagesError) throw messagesError;
+      
+      // Then delete the conversation
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      // Update local state
+      setConversations(prev => prev.filter(conv => conv.id !== id));
+      
+      toast({
+        title: "Deleted",
+        description: "Conversation has been deleted."
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error deleting conversation:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Unable to delete the conversation.',
+      });
+      return false;
+    }
+  };
 
-  // Effet pour regrouper les conversations par catégorie
+  // Effect to group conversations by category
   useEffect(() => {
     const grouped: { [key: string]: Conversation[] } = {};
     
@@ -88,7 +129,7 @@ export const useConversations = () => {
       grouped[category].push(convo);
     });
 
-    // Définir l'ordre des catégories
+    // Define order of categories
     const categoryOrder = ['Today', 'Yesterday', 'Last Week', 'Older'];
     const result = categoryOrder
       .filter(cat => grouped[cat] && grouped[cat].length > 0)
@@ -100,14 +141,14 @@ export const useConversations = () => {
     setGroupedConversations(result);
   }, [conversations]);
 
-  // Effet pour charger les conversations au montage
+  // Effect to load conversations at mount
   useEffect(() => {
     if (user) {
       fetchConversations();
     }
   }, [user]);
 
-  // Écouter les mises à jour en temps réel des conversations
+  // Listen for real-time updates to conversations
   useEffect(() => {
     if (!user) return;
     
@@ -138,5 +179,6 @@ export const useConversations = () => {
     isLoading,
     fetchConversations,
     addConversation,
+    deleteConversation,
   };
 };

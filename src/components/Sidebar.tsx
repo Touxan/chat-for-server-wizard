@@ -4,25 +4,44 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { PlusCircle, MessageCircle, ChevronDown, ChevronRight, FolderIcon, Terminal, Loader2 } from "lucide-react";
+import { PlusCircle, MessageCircle, ChevronDown, ChevronRight, FolderIcon, Terminal, Loader2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConversations, GroupedConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
 const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
-  const { groupedConversations, isLoading, addConversation } = useConversations();
+  const { groupedConversations, isLoading, addConversation, deleteConversation } = useConversations();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { conversationId } = useParams();
 
   const handleNewChat = async () => {
-    const newConversation = await addConversation("nouvelle_conversation");
+    const newConversation = await addConversation("New conversation");
     if (newConversation) {
       navigate(`/chat/${newConversation.id}`);
+    }
+  };
+  
+  const handleDeleteConversation = async (id: string) => {
+    const success = await deleteConversation(id);
+    if (success && id === conversationId) {
+      navigate('/chat');
     }
   };
 
@@ -40,7 +59,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
           disabled={!user}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
-          nouvelle_conversation
+          New conversation
         </Button>
         <Separator className="my-4 bg-[hsl(var(--sidebar-hover))/30]" />
         
@@ -49,16 +68,16 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
           <ScrollArea className="h-[calc(100vh-180px)]">
             {!user ? (
               <div className="text-center p-4 text-[hsl(var(--sidebar-text))/60]">
-                Connectez-vous pour voir vos conversations
+                Login to see your conversations
               </div>
             ) : isLoading ? (
               <div className="flex items-center justify-center p-4">
                 <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--primary))]" />
-                <span className="ml-2 text-[hsl(var(--sidebar-text))/60]">Chargement...</span>
+                <span className="ml-2 text-[hsl(var(--sidebar-text))/60]">Loading...</span>
               </div>
             ) : groupedConversations.length === 0 ? (
               <div className="text-center p-4 text-[hsl(var(--sidebar-text))/60]">
-                Aucune conversation trouvée
+                No conversations found
               </div>
             ) : (
               <div className="space-y-2">
@@ -78,20 +97,50 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                     <CollapsibleContent>
                       <div className="ml-6 space-y-1">
                         {group.chats.map((chat) => (
-                          <Button
-                            key={chat.id}
-                            variant="ghost"
-                            className="w-full justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm"
-                            onClick={() => navigate(`/chat/${chat.id}`)}
-                          >
-                            <Terminal className="mr-2 h-4 w-4 text-[hsl(var(--primary))]" />
-                            <div className="flex-1 overflow-hidden">
-                              <div className="truncate">{chat.title}</div>
-                              <p className="text-xs text-[hsl(var(--sidebar-text))/60]">
-                                {new Date(chat.created_at).toLocaleDateString()}
-                              </p>
-                            </div>
-                          </Button>
+                          <div key={chat.id} className="flex group">
+                            <Button
+                              variant="ghost"
+                              className="flex-1 justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm"
+                              onClick={() => navigate(`/chat/${chat.id}`)}
+                            >
+                              <Terminal className="mr-2 h-4 w-4 text-[hsl(var(--primary))]" />
+                              <div className="flex-1 overflow-hidden">
+                                <div className="truncate">{chat.title}</div>
+                                <p className="text-xs text-[hsl(var(--sidebar-text))/60]">
+                                  {new Date(chat.created_at).toLocaleDateString()}
+                                </p>
+                              </div>
+                            </Button>
+                            
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  className="opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-500"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this conversation? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction 
+                                    onClick={() => handleDeleteConversation(chat.id)}
+                                    className="bg-red-500 hover:bg-red-600"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         ))}
                       </div>
                     </CollapsibleContent>

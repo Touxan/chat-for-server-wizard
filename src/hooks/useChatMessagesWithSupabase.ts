@@ -5,12 +5,14 @@ import { Message } from "@/integrations/supabase/schema";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { MessageType } from "@/types/chat";
+import { useNavigate } from "react-router-dom";
 
 export const useChatMessagesWithSupabase = (conversationId?: string) => {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Function to convert Supabase messages to MessageType format
   const convertToMessageType = (message: Message): MessageType => ({
@@ -27,6 +29,26 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     
     setIsLoading(true);
     try {
+      // First check if the conversation exists
+      const { data: conversationData, error: conversationError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', conversationId)
+        .maybeSingle();
+        
+      if (conversationError) throw conversationError;
+      
+      // If conversation doesn't exist, redirect to main chat page
+      if (!conversationData) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "This conversation no longer exists.",
+        });
+        navigate('/chat');
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('messages')
         .select('*')
