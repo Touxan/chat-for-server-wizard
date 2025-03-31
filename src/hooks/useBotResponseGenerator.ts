@@ -32,9 +32,22 @@ export const useBotResponseGenerator = () => {
       
       try {
         const data = JSON.parse(responseText);
+        
+        // Ensure command is properly formatted if it exists
+        let command = null;
+        if (data.command) {
+          command = {
+            text: String(data.command.text || ''),
+            description: String(data.command.description || ''),
+            risk: ['low', 'medium', 'high'].includes(data.command.risk) 
+              ? data.command.risk 
+              : 'medium'
+          };
+        }
+        
         return {
           botContent: data.message || data.response || "I didn't understand your request.",
-          command: data.command || null
+          command: command
         };
       } catch (parseError) {
         console.error("Error parsing JSON response:", parseError);

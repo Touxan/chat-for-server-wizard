@@ -2,16 +2,48 @@
 import { supabase } from "@/integrations/supabase/client";
 import { Message } from "@/integrations/supabase/schema";
 import { MessageType } from "@/types/chat";
+import { Json } from "@/integrations/supabase/types";
+
+/**
+ * Safely parse command from Json to the expected format
+ */
+export const parseCommand = (commandJson: Json | null): MessageType['command'] | undefined => {
+  if (!commandJson) return undefined;
+  
+  // If commandJson is already an object with the required properties, return it
+  if (
+    typeof commandJson === 'object' && 
+    commandJson !== null &&
+    'text' in commandJson && 
+    'description' in commandJson && 
+    'risk' in commandJson
+  ) {
+    const { text, description, risk } = commandJson as any;
+    
+    // Validate risk value
+    if (risk === 'low' || risk === 'medium' || risk === 'high') {
+      return {
+        text: String(text),
+        description: String(description),
+        risk: risk as 'low' | 'medium' | 'high'
+      };
+    }
+  }
+  
+  // If commandJson doesn't match the expected format, return undefined
+  console.warn('Invalid command format:', commandJson);
+  return undefined;
+};
 
 /**
  * Convert Supabase messages to MessageType format
  */
-export const convertToMessageType = (message: Message): MessageType => ({
+export const convertToMessageType = (message: any): MessageType => ({
   id: message.id,
   content: message.content,
   isUser: message.is_user,
   timestamp: new Date(message.timestamp).toLocaleTimeString(),
-  command: message.command,
+  command: parseCommand(message.command)
 });
 
 /**
@@ -68,6 +100,15 @@ export const sendUserMessage = async (conversationId: string, content: string) =
 export const sendBotResponse = async (conversationId: string, content: string, command: any = null) => {
   if (!conversationId) return null;
   
+  // Ensure command is in the correct format if provided
+  const formattedCommand = command ? {
+    text: String(command.text || ''),
+    description: String(command.description || ''),
+    risk: (command.risk === 'low' || command.risk === 'medium' || command.risk === 'high') 
+      ? command.risk 
+      : 'medium'
+  } : null;
+  
   try {
     const { data, error } = await supabase
       .from('messages')
@@ -75,7 +116,7 @@ export const sendBotResponse = async (conversationId: string, content: string, c
         conversation_id: conversationId,
         content,
         is_user: false,
-        command,
+        command: formattedCommand,
       })
       .select()
       .single();
