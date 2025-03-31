@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import ChatInput from "@/components/ChatInput";
@@ -32,11 +32,42 @@ const Chat = () => {
   const [messages, setMessages] = useState<MessageType[]>(initialMessages);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isOverlayVisible, setIsOverlayVisible] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
     setIsOverlayVisible(!isOverlayVisible);
   };
+
+  const closeSidebar = () => {
+    if (isSidebarOpen) {
+      setIsSidebarOpen(false);
+      setIsOverlayVisible(false);
+    }
+  };
+
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Check if click is outside both sidebar and burger menu button
+      if (
+        sidebarRef.current && 
+        !sidebarRef.current.contains(event.target as Node) &&
+        // Don't close when clicking on the overlay as it already handles close
+        overlayRef.current !== event.target &&
+        // Make sure we're not selecting any element inside the overlay
+        !overlayRef.current?.contains(event.target as Node)
+      ) {
+        closeSidebar();
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isSidebarOpen]);
 
   const handleSendMessage = (message: string) => {
     // Add user message
@@ -145,13 +176,14 @@ const Chat = () => {
     <div className="flex flex-col h-screen bg-[#F7FAFC]">
       <Header toggleSidebar={toggleSidebar} />
       
-      <Sidebar isOpen={isSidebarOpen} />
+      <Sidebar ref={sidebarRef} isOpen={isSidebarOpen} />
       
       {/* Overlay when sidebar is open on mobile */}
       {isOverlayVisible && (
         <div 
+          ref={overlayRef}
           className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
-          onClick={toggleSidebar}
+          onClick={closeSidebar}
         />
       )}
       

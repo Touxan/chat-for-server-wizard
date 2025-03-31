@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -23,9 +23,10 @@ interface SidebarProps {
   isOpen: boolean;
 }
 
-const Sidebar = ({ isOpen }: SidebarProps) => {
+const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   return (
     <div
+      ref={ref}
       className={`${
         isOpen ? "translate-x-0" : "-translate-x-full"
       } fixed top-0 left-0 h-full bg-white shadow-lg w-80 transition-transform duration-300 ease-in-out z-40 pt-16`}
@@ -57,6 +58,8 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
       </div>
     </div>
   );
-};
+});
+
+Sidebar.displayName = "Sidebar";
 
 export default Sidebar;
