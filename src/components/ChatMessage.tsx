@@ -14,29 +14,32 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
   return (
     <div
       className={cn(
-        "flex items-start mb-6 animate-fade-in",
+        "flex items-start mb-4 animate-fade-in",
         isUser ? "justify-end" : "justify-start"
       )}
     >
       {!isUser && (
         <div className="flex-shrink-0 mr-3">
-          <Avatar className="h-10 w-10 bg-[hsl(var(--header-bg))] avatar-ring-bot">
-            <BotIcon className="h-5 w-5 text-white" />
+          <Avatar className="h-8 w-8 bg-[hsl(var(--header-bg))] border border-[hsl(var(--primary))] rounded-sm">
+            <BotIcon className="h-5 w-5 text-[hsl(var(--primary))]" />
           </Avatar>
         </div>
       )}
       
       <div
         className={cn(
-          "msg-bubble",
+          "msg-bubble terminal-text",
           isUser ? "msg-bubble-user" : "msg-bubble-bot"
         )}
       >
-        <div className="whitespace-pre-wrap mb-1.5">{message}</div>
+        <div className="whitespace-pre-wrap mb-1">
+          {isUser && <span className="text-[hsl(var(--primary))] font-bold">user@server:~$ </span>}
+          {!isUser && <span className="text-[hsl(var(--primary))] font-bold">server_wizard:~# </span>}
+          {message}
+        </div>
         <div
           className={cn(
-            "text-xs",
-            isUser ? "opacity-80" : "opacity-60"
+            "text-xs opacity-70"
           )}
         >
           {timestamp}
@@ -45,7 +48,7 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
       
       {isUser && (
         <div className="flex-shrink-0 ml-3">
-          <Avatar className="h-10 w-10 bg-[hsl(var(--chat-bubble-user))] avatar-ring-user">
+          <Avatar className="h-8 w-8 bg-[hsl(var(--chat-bubble-user))] border border-[hsl(var(--chat-bubble-user-light))] rounded-sm">
             <User className="h-5 w-5 text-white" />
           </Avatar>
         </div>

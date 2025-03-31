@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { SendHorizontal } from "lucide-react";
+import { SendHorizontal, Terminal } from "lucide-react";
 import VoiceInput from "./VoiceInput";
 
 interface ChatInputProps {
@@ -25,13 +25,14 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="glass dark:glass backdrop-blur-md w-full rounded-2xl p-3">
-      <div className="flex items-end space-x-2 w-full">
+    <form onSubmit={handleSubmit} className="bg-[hsl(var(--chat-bubble-bot))] border border-[hsl(var(--chat-bubble-bot-border))] w-full rounded-sm p-3">
+      <div className="flex items-center space-x-2 w-full">
+        <span className="text-[hsl(var(--primary))] font-mono font-bold">$</span>
         <Textarea
-          placeholder="Ask about your servers... (or use voice input)"
+          placeholder="Type your command..."
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="min-h-[50px] resize-none flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
+          className="min-h-[40px] resize-none flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))] border-none font-mono text-[hsl(var(--chat-bubble-bot-text))]"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -39,15 +40,16 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
             }
           }}
         />
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 items-center">
           <VoiceInput onTranscript={handleVoiceTranscript} />
           <Button 
             type="submit" 
-            size="icon" 
+            size="sm" 
             disabled={!message.trim()} 
-            className="rounded-full bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))/90]"
+            className="bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))/90] rounded-sm"
           >
-            <SendHorizontal className="h-5 w-5" />
+            <SendHorizontal className="h-4 w-4" />
+            <span className="sr-only">Send</span>
           </Button>
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 
 type Theme = "light" | "dark";
@@ -13,8 +14,8 @@ export const useTheme = () => {
       return "dark";
     }
     
-    // Default to light
-    return "light";
+    // Default to dark for terminal feel
+    return "dark";
   });
 
   useEffect(() => {
@@ -27,6 +28,11 @@ export const useTheme = () => {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    
+    // Log theme change in terminal style
+    console.log(`%c[THEME] %cSwitched to ${theme} mode`, 
+      'color: #33d17a; font-weight: bold;', 
+      'color: inherit;');
   }, [theme]);
 
   const toggleTheme = () => {
