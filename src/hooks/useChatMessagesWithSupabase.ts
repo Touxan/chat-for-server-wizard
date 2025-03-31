@@ -226,10 +226,33 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       )
       .subscribe();
 
+    // Also listen for changes to the conversations table to detect deletions
+    const conversationsChannel = supabase
+      .channel('conversations-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'conversations',
+          filter: `id=eq.${conversationId}`,
+        },
+        () => {
+          toast({
+            variant: "destructive",
+            title: "Conversation Deleted",
+            description: "This conversation has been deleted.",
+          });
+          navigate('/chat');
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(conversationsChannel);
     };
-  }, [conversationId, user]);
+  }, [conversationId, user, navigate]);
 
   return {
     messages,

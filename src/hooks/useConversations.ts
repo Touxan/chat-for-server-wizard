@@ -145,6 +145,9 @@ export const useConversations = () => {
   useEffect(() => {
     if (user) {
       fetchConversations();
+    } else {
+      setConversations([]);
+      setGroupedConversations([]);
     }
   }, [user]);
 
