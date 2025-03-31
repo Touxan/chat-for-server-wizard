@@ -58,7 +58,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
       <div className="p-4">
         <Button className="w-full bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))]/90 shadow-md mb-4 py-5 text-white font-mono rounded-sm">
           <PlusCircle className="mr-2 h-4 w-4" />
-          new_chat.sh
+          new_chat
         </Button>
         <Separator className="my-4 bg-[hsl(var(--sidebar-hover))/30]" />
         
@@ -104,7 +104,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
       </div>
     </div>
   );
-};
+});
 
 Sidebar.displayName = "Sidebar";
 
