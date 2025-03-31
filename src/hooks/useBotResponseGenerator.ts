@@ -32,6 +32,7 @@ export const useBotResponseGenerator = () => {
       
       try {
         const data = JSON.parse(responseText);
+        console.log("Parsed response from API:", data);
         
         // Handle the new response format which uses "output" field
         if (data.output) {
@@ -39,7 +40,6 @@ export const useBotResponseGenerator = () => {
           let command = null;
           
           // Check if there's command information in the response
-          // This is a fallback in case commands are added in the future
           if (data.command) {
             command = {
               text: String(data.command.text || ''),
@@ -51,7 +51,7 @@ export const useBotResponseGenerator = () => {
           }
           
           return {
-            botContent: data.output,
+            botContent: data.output, // Contains markdown formatting
             command: command
           };
         }
@@ -75,7 +75,6 @@ export const useBotResponseGenerator = () => {
         };
       } catch (parseError) {
         console.error("Error parsing JSON response:", parseError);
-        // If JSON parsing fails, return an error message
         return {
           botContent: "An error occurred while processing your request.",
           command: null

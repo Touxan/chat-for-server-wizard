@@ -3,6 +3,7 @@ import React from "react";
 import { Avatar } from "@/components/ui/avatar";
 import { BotIcon, User } from "lucide-react";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown";
 
 interface ChatMessageProps {
   message: string;
@@ -35,7 +36,31 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
         <div className="whitespace-pre-wrap mb-1">
           {isUser && <span className="text-[hsl(var(--primary))] font-bold">user@server:~$ </span>}
           {!isUser && <span className="text-[hsl(var(--primary))] font-bold">server_wizard:~# </span>}
-          {message}
+          
+          {isUser ? (
+            message
+          ) : (
+            <ReactMarkdown 
+              components={{
+                // Override to maintain terminal styling
+                p: ({node, ...props}) => <span {...props} />,
+                // Make links open in new tab
+                a: ({node, ...props}) => <a target="_blank" rel="noopener noreferrer" className="text-[hsl(var(--primary))] underline" {...props} />,
+                // Style headers
+                h1: ({node, ...props}) => <h1 className="text-lg font-bold mt-2 mb-1" {...props} />,
+                h2: ({node, ...props}) => <h2 className="text-md font-bold mt-2 mb-1" {...props} />,
+                h3: ({node, ...props}) => <h3 className="font-bold mt-2 mb-1" {...props} />,
+                // Style lists
+                ul: ({node, ...props}) => <ul className="list-disc ml-4 my-1" {...props} />,
+                ol: ({node, ...props}) => <ol className="list-decimal ml-4 my-1" {...props} />,
+                // Style code blocks
+                code: ({node, ...props}) => <code className="bg-black/20 px-1 rounded font-mono" {...props} />,
+                pre: ({node, ...props}) => <pre className="bg-black/20 p-2 rounded my-2 overflow-x-auto" {...props} />,
+              }}
+            >
+              {message}
+            </ReactMarkdown>
+          )}
         </div>
         <div
           className={cn(
