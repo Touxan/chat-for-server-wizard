@@ -1,117 +1,115 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Terminal Colors */
-    --background: 0 0% 0%;
-    --foreground: 120 100% 50%;
+    /* Light Mode Terminal Colors */
+    --background: 0 0% 95%;
+    --foreground: 210 11% 15%;
 
-    --card: 0 0% 0%;
-    --card-foreground: 120 100% 50%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 11% 15%;
 
-    --popover: 0 0% 0%;
-    --popover-foreground: 120 100% 50%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 11% 15%;
 
-    --primary: 120 100% 30%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 120 100% 10%;
-    --secondary-foreground: 120 100% 50%;
+    --secondary: 210 11% 93%;
+    --secondary-foreground: 210 11% 15%;
 
-    --muted: 120 100% 10%;
-    --muted-foreground: 120 100% 40%;
+    --muted: 210 11% 93%;
+    --muted-foreground: 210 11% 43%;
 
-    --accent: 120 100% 10%;
-    --accent-foreground: 120 100% 50%;
+    --accent: 210 11% 93%;
+    --accent-foreground: 210 11% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 120 100% 20%;
-    --input: 120 100% 20%;
-    --ring: 120 100% 50%;
+    --border: 210 11% 85%;
+    --input: 210 11% 85%;
+    --ring: 210 11% 15%;
 
-    --radius: 0.25rem;
+    --radius: 0.3rem;
 
     /* Custom Chat Colors */
-    --chat-bg: 0 0% 0%;
-    --chat-gradient-from: 0 0% 0%;
-    --chat-gradient-to: 0 0% 0%;
+    --chat-bg: 210 11% 93%;
+    --chat-gradient-from: 210 11% 95%;
+    --chat-gradient-to: 210 11% 90%;
     
     /* User Message */
-    --chat-bubble-user: 0 0% 0%;
-    --chat-bubble-user-light: 120 100% 30%;
-    --chat-bubble-user-text: 120 100% 50%;
+    --chat-bubble-user: 142 76% 36%;
+    --chat-bubble-user-light: 142 76% 46%;
+    --chat-bubble-user-text: 0 0% 98%;
     
     /* Bot Message */
-    --chat-bubble-bot: 0 0% 0%;
-    --chat-bubble-bot-text: 120 100% 50%;
-    --chat-bubble-bot-border: 120 100% 20%;
+    --chat-bubble-bot: 210 11% 15%;
+    --chat-bubble-bot-text: 210 11% 93%;
+    --chat-bubble-bot-border: 210 11% 25%;
     
     /* Header and Sidebar */
-    --header-bg: 0 0% 0%;
-    --header-text: 120 100% 50%;
-    --header-accent: 120 100% 20%;
-    --sidebar-bg: 0 0% 0%;
-    --sidebar-text: 120 100% 50%;
-    --sidebar-hover: 120 100% 15%;
+    --header-bg: 210 11% 15%;
+    --header-text: 210 11% 93%;
+    --header-accent: 210 11% 30%;
+    --sidebar-bg: 210 11% 15%;
+    --sidebar-text: 210 11% 93%;
+    --sidebar-hover: 142 76% 36%;
   }
 
   .dark {
-    /* Terminal Dark Mode - same as light mode since terminal is already dark */
-    --background: 0 0% 0%;
-    --foreground: 120 100% 50%;
+    --background: 210 11% 8%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 0%;
-    --card-foreground: 120 100% 50%;
+    --card: 210 11% 8%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 0%;
-    --popover-foreground: 120 100% 50%;
+    --popover: 210 11% 8%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 120 100% 30%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 142 76% 36%;
+    --primary-foreground: 210 11% 8%;
 
-    --secondary: 120 100% 10%;
-    --secondary-foreground: 120 100% 50%;
+    --secondary: 210 11% 15%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 120 100% 10%;
-    --muted-foreground: 120 100% 40%;
+    --muted: 210 11% 15%;
+    --muted-foreground: 210 11% 70%;
 
-    --accent: 120 100% 10%;
-    --accent-foreground: 120 100% 50%;
+    --accent: 210 11% 15%;
+    --accent-foreground: 0 0% 98%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 120 100% 20%;
-    --input: 120 100% 20%;
-    --ring: 120 100% 50%;
+    --border: 210 11% 15%;
+    --input: 210 11% 15%;
+    --ring: 212.7 26.8% 83.9%;
 
     /* Custom Chat Colors */
-    --chat-bg: 0 0% 0%;
-    --chat-gradient-from: 0 0% 0%;
-    --chat-gradient-to: 0 0% 0%;
+    --chat-bg: 210 11% 5%;
+    --chat-gradient-from: 210 11% 8%;
+    --chat-gradient-to: 210 11% 3%;
     
     /* User Message */
-    --chat-bubble-user: 0 0% 0%;
-    --chat-bubble-user-light: 120 100% 30%;
-    --chat-bubble-user-text: 120 100% 50%;
+    --chat-bubble-user: 142 76% 36%;
+    --chat-bubble-user-light: 142 56% 26%;
+    --chat-bubble-user-text: 0 0% 98%;
     
     /* Bot Message */
-    --chat-bubble-bot: 0 0% 0%;
-    --chat-bubble-bot-text: 120 100% 50%;
-    --chat-bubble-bot-border: 120 100% 20%;
+    --chat-bubble-bot: 210 11% 15%;
+    --chat-bubble-bot-text: 210 11% 93%;
+    --chat-bubble-bot-border: 210 11% 25%;
     
     /* Header and Sidebar */
-    --header-bg: 0 0% 0%;
-    --header-text: 120 100% 50%;
-    --header-accent: 120 100% 20%;
-    --sidebar-bg: 0 0% 0%;
-    --sidebar-text: 120 100% 50%;
-    --sidebar-hover: 120 100% 15%;
+    --header-bg: 210 11% 8%;
+    --header-text: 142 76% 36%;
+    --header-accent: 210 11% 15%;
+    --sidebar-bg: 210 11% 8%;
+    --sidebar-text: 142 76% 36%;
+    --sidebar-hover: 210 11% 15%;
   }
 }
 
@@ -164,7 +162,7 @@
 
 .terminal-prompt::before {
   content: '$ ';
-  color: #0f0;
+  color: hsl(var(--primary));
   font-weight: bold;
 }
 
@@ -183,8 +181,8 @@
 }
 
 .chat-pattern {
-  background-color: black;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23006600' fill-opacity='0.08'%3E%3Cpath d='M12 0h48v12H36v48H24V12H0V0h12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-color: hsl(var(--chat-bg));
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23666666' fill-opacity='0.08'%3E%3Cpath d='M12 0h48v12H36v48H24V12H0V0h12z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* Message bubble styles */
@@ -198,38 +196,38 @@
 }
 
 .msg-bubble-user {
-  background: black;
-  color: #0f0;
-  border: 1px solid #0f0;
+  background: hsl(var(--chat-bubble-user));
+  color: hsl(var(--chat-bubble-user-text));
+  border: 1px solid hsl(var(--chat-bubble-user-light));
 }
 
 .msg-bubble-bot {
-  background: black;
-  color: #0f0;
-  border: 1px solid #0f0;
+  background: hsl(var(--chat-bubble-bot));
+  color: hsl(var(--chat-bubble-bot-text));
+  border: 1px solid hsl(var(--chat-bubble-bot-border));
 }
 
 .dark .msg-bubble-bot {
-  background: black;
-  border: 1px solid #0f0;
-  color: #0f0;
+  background: hsl(var(--chat-bubble-bot));
+  border: 1px solid hsl(var(--chat-bubble-bot-border));
+  color: hsl(var(--chat-bubble-bot-text));
 }
 
 /* Avatar styles */
 .avatar-ring-user {
-  @apply ring-2 ring-[#0f0] ring-offset-2;
+  @apply ring-2 ring-[hsl(var(--chat-bubble-user))] ring-offset-2;
 }
 
 .avatar-ring-bot {
-  @apply ring-2 ring-[#0f0] ring-offset-2;
+  @apply ring-2 ring-[hsl(var(--header-bg))] ring-offset-2;
 }
 
 .dark .avatar-ring-user {
-  @apply ring-offset-black;
+  @apply ring-offset-[hsl(var(--chat-bg))];
 }
 
 .dark .avatar-ring-bot {
-  @apply ring-offset-black;
+  @apply ring-offset-[hsl(var(--chat-bg))];
 }
 
 /* Terminal style scrollbar */
@@ -238,14 +236,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: black;
+  background: hsl(var(--chat-bg));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #0f0;
-  border: 2px solid black;
+  background: hsl(var(--chat-bubble-bot));
+  border: 2px solid hsl(var(--chat-bg));
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #00ff00;
+  background: hsl(var(--header-accent));
 }

@@ -41,7 +41,7 @@ const Chat = () => {
   }, [messages]);
 
   return (
-    <div className="flex flex-col h-screen bg-black">
+    <div className="flex flex-col h-screen bg-[hsl(var(--chat-bg))] chat-pattern">
       <Header toggleSidebar={toggleSidebar} />
       
       <Sidebar ref={sidebarRef} isOpen={isSidebarOpen} />

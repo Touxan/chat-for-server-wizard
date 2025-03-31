@@ -20,8 +20,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
     >
       {!isUser && (
         <div className="flex-shrink-0 mr-3">
-          <Avatar className="h-8 w-8 bg-black border border-[#0f0] rounded-sm">
-            <BotIcon className="h-5 w-5 text-[#0f0]" />
+          <Avatar className="h-8 w-8 bg-[hsl(var(--header-bg))] border border-[hsl(var(--primary))] rounded-sm">
+            <BotIcon className="h-5 w-5 text-[hsl(var(--primary))]" />
           </Avatar>
         </div>
       )}
@@ -33,8 +33,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
         )}
       >
         <div className="whitespace-pre-wrap mb-1">
-          {isUser && <span className="text-[#0f0] font-bold">t0xan@server:~$ </span>}
-          {!isUser && <span className="text-[#0f0] font-bold">server_wizard:~# </span>}
+          {isUser && <span className="text-[hsl(var(--primary))] font-bold">user@server:~$ </span>}
+          {!isUser && <span className="text-[hsl(var(--primary))] font-bold">server_wizard:~# </span>}
           {message}
         </div>
         <div
@@ -48,8 +48,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
       
       {isUser && (
         <div className="flex-shrink-0 ml-3">
-          <Avatar className="h-8 w-8 bg-black border border-[#0f0]/30 rounded-sm">
-            <User className="h-5 w-5 text-[#0f0]" />
+          <Avatar className="h-8 w-8 bg-[hsl(var(--chat-bubble-user))] border border-[hsl(var(--chat-bubble-user-light))] rounded-sm">
+            <User className="h-5 w-5 text-white" />
           </Avatar>
         </div>
       )}
