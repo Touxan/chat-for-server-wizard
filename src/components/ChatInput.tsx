@@ -25,13 +25,13 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-4 w-full">
+    <form onSubmit={handleSubmit} className="glass dark:glass backdrop-blur-md w-full rounded-2xl p-3">
       <div className="flex items-end space-x-2 w-full">
         <Textarea
           placeholder="Ask about your servers... (or use voice input)"
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="min-h-[50px] resize-none flex-1"
+          className="min-h-[50px] resize-none flex-1 bg-transparent focus:outline-none focus:ring-1 focus:ring-[hsl(var(--primary))]"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
@@ -41,7 +41,12 @@ const ChatInput = ({ onSendMessage }: ChatInputProps) => {
         />
         <div className="flex space-x-2">
           <VoiceInput onTranscript={handleVoiceTranscript} />
-          <Button type="submit" size="icon" disabled={!message.trim()}>
+          <Button 
+            type="submit" 
+            size="icon" 
+            disabled={!message.trim()} 
+            className="rounded-full bg-[hsl(var(--primary))] hover:bg-[hsl(var(--primary))/90]"
+          >
             <SendHorizontal className="h-5 w-5" />
           </Button>
         </div>
