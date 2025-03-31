@@ -12,7 +12,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Fonction pour convertir les messages de Supabase en format MessageType
+  // Function to convert Supabase messages to MessageType format
   const convertToMessageType = (message: Message): MessageType => ({
     id: message.id,
     content: message.content,
@@ -21,7 +21,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     command: message.command,
   });
 
-  // Fonction pour récupérer les messages d'une conversation
+  // Function to fetch messages from a conversation
   const fetchMessages = async () => {
     if (!conversationId || !user) return;
     
@@ -39,17 +39,17 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       setMessages(convertedMessages.length > 0 ? convertedMessages : [
         {
           id: "welcome",
-          content: "Bonjour ! Je suis votre assistant Server Wizard pour Scaleway. Je peux vous aider à gérer vos serveurs en créant et exécutant des commandes avec votre approbation. Comment puis-je vous aider aujourd'hui ?",
+          content: "Hello! I'm your Server Wizard assistant for Scaleway. I can help you manage your servers by creating and executing commands with your approval. How can I help you today?",
           isUser: false,
-          timestamp: "À l'instant",
+          timestamp: "Just now",
         },
       ]);
     } catch (error: any) {
       console.error("Error fetching messages:", error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de récupérer les messages.",
+        title: "Error",
+        description: "Unable to retrieve messages.",
       });
     } finally {
       setIsLoading(false);
@@ -60,7 +60,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
     if (!conversationId || !user) return;
     
     try {
-      // Ajouter le message de l'utilisateur
+      // Add user message
       const { data: userMessageData, error: userMessageError } = await supabase
         .from('messages')
         .insert({
@@ -73,34 +73,34 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
 
       if (userMessageError) throw userMessageError;
       
-      // Simuler la réponse du bot (dans une application réelle, ceci serait géré par une API ou une fonction backend)
+      // Simulate bot response (in a real app, this would be handled by an API or backend function)
       setTimeout(async () => {
         let botContent = "";
         let command = null;
         
         if (message.toLowerCase().includes("restart") || message.toLowerCase().includes("redémarrer")) {
-          botContent = "Je peux vous aider à redémarrer votre serveur. Voici la commande que je recommande :";
+          botContent = "I can help you restart your server. Here's the command I recommend:";
           command = {
             text: "sudo systemctl restart nginx",
-            description: "Cette commande redémarrera le serveur web NGINX sans affecter les autres services.",
+            description: "This command will restart the NGINX web server without affecting other services.",
             risk: "low" as const,
           };
         } else if (message.toLowerCase().includes("update") || message.toLowerCase().includes("mise à jour")) {
-          botContent = "Je peux vous aider à mettre à jour votre système. Voici la commande recommandée :";
+          botContent = "I can help you update your system. Here's the recommended command:";
           command = {
             text: "sudo apt update && sudo apt upgrade -y",
-            description: "Cette commande mettra à jour la liste des paquets et mettra à niveau tous les paquets installés vers leurs dernières versions.",
+            description: "This command will update the package list and upgrade all installed packages to their latest versions.",
             risk: "medium" as const,
           };
         } else if (message.toLowerCase().includes("delete") || message.toLowerCase().includes("supprimer")) {
-          botContent = "Je comprends que vous souhaitez supprimer quelque chose. Veuillez être prudent avec cette commande :";
+          botContent = "I understand that you want to delete something. Please be careful with this command:";
           command = {
             text: "sudo rm -rf /var/log/old_logs/",
-            description: "Cette commande supprimera récursivement tous les fichiers dans le répertoire old_logs. Assurez-vous que vous n'avez plus besoin de ces fichiers.",
+            description: "This command will recursively delete all files in the old_logs directory. Make sure you no longer need these files.",
             risk: "high" as const,
           };
         } else {
-          botContent = "J'analyse votre demande. Pourriez-vous fournir plus de détails sur ce que vous souhaitez faire avec vos serveurs Scaleway ?";
+          botContent = "I'm analyzing your request. Could you provide more details about what you'd like to do with your Scaleway servers?";
         }
         
         const { error: botMessageError } = await supabase
@@ -119,8 +119,8 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       console.error("Error sending message:", error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'envoyer le message.",
+        title: "Error",
+        description: "Unable to send message.",
       });
     }
   };
@@ -135,7 +135,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       const { error } = await supabase
         .from('messages')
         .update({
-          content: `${messageToUpdate.content}\n\nCommande exécutée avec succès: ${messageToUpdate.command.text}`,
+          content: `${messageToUpdate.content}\n\nCommand executed successfully: ${messageToUpdate.command.text}`,
           command: null,
         })
         .eq('id', messageId);
@@ -145,8 +145,8 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       console.error("Error approving command:", error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible d'approuver la commande.",
+        title: "Error",
+        description: "Unable to approve command.",
       });
     }
   };
@@ -161,7 +161,7 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       const { error } = await supabase
         .from('messages')
         .update({
-          content: `${messageToUpdate.content}\n\nExécution de la commande annulée.`,
+          content: `${messageToUpdate.content}\n\nCommand execution cancelled.`,
           command: null,
         })
         .eq('id', messageId);
@@ -171,20 +171,20 @@ export const useChatMessagesWithSupabase = (conversationId?: string) => {
       console.error("Error declining command:", error);
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Impossible de refuser la commande.",
+        title: "Error",
+        description: "Unable to decline command.",
       });
     }
   };
 
-  // Effet pour charger les messages au montage ou au changement de conversation
+  // Effect to load messages on mount or conversation change
   useEffect(() => {
     if (conversationId && user) {
       fetchMessages();
     }
   }, [conversationId, user]);
 
-  // Écouter les mises à jour en temps réel des messages
+  // Listen for real-time updates to messages
   useEffect(() => {
     if (!conversationId || !user) return;
     
