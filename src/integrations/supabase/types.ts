@@ -9,7 +9,95 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      conversations: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          command: Json | null
+          content: string
+          conversation_id: string
+          id: string
+          is_user: boolean | null
+          timestamp: string
+        }
+        Insert: {
+          command?: Json | null
+          content: string
+          conversation_id: string
+          id?: string
+          is_user?: boolean | null
+          timestamp?: string
+        }
+        Update: {
+          command?: Json | null
+          content?: string
+          conversation_id?: string
+          id?: string
+          is_user?: boolean | null
+          timestamp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company: string | null
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_connection: string | null
+          last_name: string
+        }
+        Insert: {
+          company?: string | null
+          created_at?: string
+          email: string
+          first_name: string
+          id: string
+          last_connection?: string | null
+          last_name: string
+        }
+        Update: {
+          company?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_connection?: string | null
+          last_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

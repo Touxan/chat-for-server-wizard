@@ -1,68 +1,37 @@
 
-import React, { useRef, useEffect } from "react";
-import Header from "@/components/Header";
-import Sidebar from "@/components/Sidebar";
-import ChatMessagesArea from "@/components/ChatMessagesArea";
-import ChatInputWrapper from "@/components/ChatInputWrapper";
-import SidebarOverlay from "@/components/SidebarOverlay";
-import { useChatMessages } from "@/hooks/useChatMessages";
-import { useSidebar } from "@/hooks/useSidebar";
-import { useTheme } from "@/hooks/useTheme";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useConversations } from "@/hooks/useConversations";
 
 const Chat = () => {
-  const { 
-    messages, 
-    handleSendMessage, 
-    handleApproveCommand, 
-    handleDeclineCommand 
-  } = useChatMessages();
-  
-  const {
-    isSidebarOpen,
-    isOverlayVisible,
-    sidebarRef,
-    overlayRef,
-    toggleSidebar,
-    closeSidebar
-  } = useSidebar();
-  
-  // Initialize the theme hook
-  const { theme } = useTheme();
-  
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const { addConversation, isLoading: isConversationsLoading } = useConversations();
 
-  // Scroll to bottom when messages change
   useEffect(() => {
-    const chatContainer = document.getElementById("chat-scroll-area");
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const createAndNavigate = async () => {
+      if (user && !isConversationsLoading) {
+        // Créer une nouvelle conversation et naviguer vers celle-ci
+        const newConversation = await addConversation("nouvelle_conversation");
+        if (newConversation) {
+          navigate(`/chat/${newConversation.id}`, { replace: true });
+        }
+      } else if (!isAuthLoading && !user) {
+        // Rediriger vers la page d'authentification si l'utilisateur n'est pas connecté
+        navigate("/auth", { replace: true });
+      }
+    };
+
+    createAndNavigate();
+  }, [user, isAuthLoading, isConversationsLoading]);
 
   return (
-    <div className="flex flex-col h-screen bg-[hsl(var(--chat-bg))] chat-pattern">
-      <Header toggleSidebar={toggleSidebar} />
-      
-      <Sidebar ref={sidebarRef} isOpen={isSidebarOpen} />
-      
-      <SidebarOverlay 
-        isVisible={isOverlayVisible} 
-        overlayRef={overlayRef}
-        onClose={closeSidebar} 
-      />
-      
-      <div className="flex-1 flex flex-col relative overflow-hidden">
-        <div className="flex-1 flex flex-col h-full">
-          <ChatMessagesArea 
-            messages={messages}
-            onApproveCommand={handleApproveCommand}
-            onDeclineCommand={handleDeclineCommand}
-            messagesEndRef={messagesEndRef}
-          />
-          
-          <ChatInputWrapper onSendMessage={handleSendMessage} />
-        </div>
+    <div className="flex-1 flex items-center justify-center h-screen bg-[hsl(var(--background))]">
+      <div className="flex flex-col items-center space-y-4">
+        <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--primary))]" />
+        <p className="text-[hsl(var(--foreground))]">Création d'une nouvelle conversation...</p>
       </div>
     </div>
   );
