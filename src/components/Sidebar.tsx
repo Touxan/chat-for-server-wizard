@@ -14,11 +14,11 @@ interface ChatHistoryItem {
 }
 
 const ChatHistory: ChatHistoryItem[] = [
-  { id: "1", title: "server_restart.log", date: "2 hours ago" },
-  { id: "2", title: "db_backup.log", date: "Yesterday" },
-  { id: "3", title: "security_audit.log", date: "3 days ago" },
-  { id: "4", title: "network_config.log", date: "Last week" },
-  { id: "5", title: "perf_tuning.log", date: "2 weeks ago" },
+  { id: "1", title: "server_restart", date: "2 hours ago" },
+  { id: "2", title: "db_backup", date: "Yesterday" },
+  { id: "3", title: "security_audit", date: "3 days ago" },
+  { id: "4", title: "network_config", date: "Last week" },
+  { id: "5", title: "perf_tuning", date: "2 weeks ago" },
 ];
 
 // Group chats by date category
