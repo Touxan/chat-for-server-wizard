@@ -20,7 +20,7 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
     >
       {!isUser && (
         <div className="flex-shrink-0 mr-3">
-          <Avatar className="h-8 w-8 bg-[#1A2B42]">
+          <Avatar className="h-8 w-8 bg-primary">
             <BotIcon className="h-5 w-5 text-white" />
           </Avatar>
         </div>
@@ -29,8 +29,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
         className={cn(
           "max-w-[80%] rounded-lg p-4",
           isUser
-            ? "bg-[#38B2AC] text-white rounded-br-none"
-            : "bg-white border border-gray-200 rounded-bl-none"
+            ? "bg-primary text-white rounded-br-none"
+            : "bg-white border border-gray-200 rounded-bl-none shadow-sm"
         )}
       >
         <div className="whitespace-pre-wrap mb-1">{message}</div>
@@ -45,8 +45,8 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
       </div>
       {isUser && (
         <div className="flex-shrink-0 ml-3">
-          <Avatar className="h-8 w-8 bg-gray-300">
-            <User className="h-5 w-5 text-gray-600" />
+          <Avatar className="h-8 w-8 bg-secondary">
+            <User className="h-5 w-5 text-primary" />
           </Avatar>
         </div>
       )}
@@ -55,3 +55,4 @@ const ChatMessage = ({ message, isUser, timestamp }: ChatMessageProps) => {
 };
 
 export default ChatMessage;
+

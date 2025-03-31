@@ -10,13 +10,13 @@ interface HeaderProps {
 
 const Header = ({ toggleSidebar }: HeaderProps) => {
   return (
-    <header className="bg-[#1A2B42] text-white p-4 flex justify-between items-center">
+    <header className="bg-primary text-white p-4 flex justify-between items-center">
       <div className="flex items-center">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={toggleSidebar} 
-          className="text-white hover:bg-[#2B3D54]"
+          className="text-white hover:bg-primary/80"
         >
           <Menu size={24} />
         </Button>
@@ -28,3 +28,4 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
 };
 
 export default Header;
+
