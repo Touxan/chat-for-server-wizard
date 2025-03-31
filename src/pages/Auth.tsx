@@ -18,19 +18,19 @@ import { Terminal } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const loginSchema = z.object({
-  email: z.string().email("Veuillez entrer une adresse e-mail valide"),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  email: z.string().email("Please enter a valid email address"),
+  password: z.string().min(6, "Password must contain at least 6 characters"),
 });
 
 const registerSchema = z.object({
-  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Veuillez entrer une adresse e-mail valide"),
+  firstName: z.string().min(2, "First name must contain at least 2 characters"),
+  lastName: z.string().min(2, "Last name must contain at least 2 characters"),
+  email: z.string().email("Please enter a valid email address"),
   company: z.string().optional(),
-  password: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
-  confirmPassword: z.string().min(6, "Le mot de passe doit contenir au moins 6 caractères"),
+  password: z.string().min(6, "Password must contain at least 6 characters"),
+  confirmPassword: z.string().min(6, "Password must contain at least 6 characters"),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Les mots de passe ne correspondent pas",
+  message: "Passwords don't match",
   path: ["confirmPassword"],
 });
 
@@ -87,14 +87,14 @@ const Auth = () => {
               Server_Wizard.sh
             </h2>
             <p className="mt-2 text-sm text-[hsl(var(--muted-foreground))]">
-              Gérez vos serveurs de manière efficace
+              Manage your servers efficiently
             </p>
           </div>
 
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Connexion</TabsTrigger>
-              <TabsTrigger value="register">Inscription</TabsTrigger>
+              <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsTrigger value="register">Register</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
@@ -107,7 +107,7 @@ const Auth = () => {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="vous@exemple.com" {...field} />
+                          <Input placeholder="you@example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -119,7 +119,7 @@ const Auth = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mot de passe</FormLabel>
+                        <FormLabel>Password</FormLabel>
                         <FormControl>
                           <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
@@ -129,7 +129,7 @@ const Auth = () => {
                   />
                   
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Connexion en cours..." : "Se connecter"}
+                    {isLoading ? "Logging in..." : "Login"}
                   </Button>
                 </form>
               </Form>
@@ -144,9 +144,9 @@ const Auth = () => {
                       name="firstName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Prénom</FormLabel>
+                          <FormLabel>First Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Jean" {...field} />
+                            <Input placeholder="John" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -158,9 +158,9 @@ const Auth = () => {
                       name="lastName"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Nom</FormLabel>
+                          <FormLabel>Last Name</FormLabel>
                           <FormControl>
-                            <Input placeholder="Dupont" {...field} />
+                            <Input placeholder="Doe" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -175,7 +175,7 @@ const Auth = () => {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input placeholder="vous@exemple.com" {...field} />
+                          <Input placeholder="you@example.com" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -187,9 +187,9 @@ const Auth = () => {
                     name="company"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Entreprise (optionnel)</FormLabel>
+                        <FormLabel>Company (optional)</FormLabel>
                         <FormControl>
-                          <Input placeholder="Votre entreprise" {...field} />
+                          <Input placeholder="Your company" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -201,7 +201,7 @@ const Auth = () => {
                     name="password"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Mot de passe</FormLabel>
+                        <FormLabel>Password</FormLabel>
                         <FormControl>
                           <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
@@ -215,7 +215,7 @@ const Auth = () => {
                     name="confirmPassword"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Confirmer le mot de passe</FormLabel>
+                        <FormLabel>Confirm Password</FormLabel>
                         <FormControl>
                           <Input type="password" placeholder="••••••••" {...field} />
                         </FormControl>
@@ -225,7 +225,7 @@ const Auth = () => {
                   />
                   
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Inscription en cours..." : "S'inscrire"}
+                    {isLoading ? "Registering..." : "Register"}
                   </Button>
                 </form>
               </Form>

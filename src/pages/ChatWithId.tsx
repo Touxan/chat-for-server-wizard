@@ -42,7 +42,7 @@ const ChatWithId = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Rediriger vers la page d'authentification si l'utilisateur n'est pas connecté
+  // Redirect to authentication page if user is not logged in
   if (!isAuthLoading && !user) {
     return <Navigate to="/auth" replace />;
   }
@@ -64,7 +64,7 @@ const ChatWithId = () => {
           <div className="flex-1 flex items-center justify-center">
             <div className="flex flex-col items-center space-y-4">
               <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--primary))]" />
-              <p className="text-[hsl(var(--foreground))]">Chargement...</p>
+              <p className="text-[hsl(var(--foreground))]">Loading...</p>
             </div>
           </div>
         ) : (

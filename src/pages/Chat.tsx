@@ -13,13 +13,13 @@ const Chat = () => {
   useEffect(() => {
     const createAndNavigate = async () => {
       if (user && !isConversationsLoading) {
-        // Créer une nouvelle conversation et naviguer vers celle-ci
-        const newConversation = await addConversation("nouvelle_conversation");
+        // Create a new conversation and navigate to it
+        const newConversation = await addConversation("New Conversation");
         if (newConversation) {
           navigate(`/chat/${newConversation.id}`, { replace: true });
         }
       } else if (!isAuthLoading && !user) {
-        // Rediriger vers la page d'authentification si l'utilisateur n'est pas connecté
+        // Redirect to authentication page if the user is not logged in
         navigate("/auth", { replace: true });
       }
     };
@@ -31,7 +31,7 @@ const Chat = () => {
     <div className="flex-1 flex items-center justify-center h-screen bg-[hsl(var(--background))]">
       <div className="flex flex-col items-center space-y-4">
         <Loader2 className="h-8 w-8 animate-spin text-[hsl(var(--primary))]" />
-        <p className="text-[hsl(var(--foreground))]">Création d'une nouvelle conversation...</p>
+        <p className="text-[hsl(var(--foreground))]">Creating a new conversation...</p>
       </div>
     </div>
   );
