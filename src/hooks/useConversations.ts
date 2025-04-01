@@ -118,7 +118,7 @@ export const useConversations = () => {
     }
   };
   
-  // Function to delete a conversation - Fixed with proper error handling and transaction approach
+  // Function to delete a conversation - Enhanced with better error handling and more robust deletion approach
   const deleteConversation = async (id: string) => {
     if (!user || !id) return false;
     
@@ -128,10 +128,9 @@ export const useConversations = () => {
       // First check if conversation exists and belongs to user
       const { data: conversationData, error: checkError } = await supabase
         .from('conversations')
-        .select('id')
+        .select('id, user_id')
         .eq('id', id)
-        .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
       if (checkError) {
         console.error('Error checking conversation:', checkError);
@@ -139,8 +138,13 @@ export const useConversations = () => {
       }
       
       if (!conversationData) {
-        console.error(`Conversation ${id} not found or doesn't belong to user ${user.id}`);
+        console.error(`Conversation ${id} not found`);
         throw new Error("Conversation not found");
+      }
+      
+      if (conversationData.user_id !== user.id) {
+        console.error(`Conversation ${id} doesn't belong to user ${user.id}`);
+        throw new Error("You don't have permission to delete this conversation");
       }
       
       // Delete all messages associated with the conversation first
@@ -154,20 +158,21 @@ export const useConversations = () => {
         throw messagesError;
       }
       
-      console.log(`Deleted messages for conversation ${id}`);
+      console.log(`Successfully deleted messages for conversation ${id}`);
       
       // Then delete the conversation itself
-      const { error: conversationError } = await supabase
+      const { error: conversationError, data: deleteData } = await supabase
         .from('conversations')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select();
         
       if (conversationError) {
         console.error('Error deleting conversation:', conversationError);
         throw conversationError;
       }
       
-      console.log('Deleted conversation with ID:', id);
+      console.log('Deleted conversation with ID:', id, 'Result:', deleteData);
       
       // Update local state by filtering out the deleted conversation
       setConversations(prev => prev.filter(conv => conv.id !== id));
@@ -183,7 +188,7 @@ export const useConversations = () => {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Unable to delete the conversation.',
+        description: error.message || 'Unable to delete the conversation.',
       });
       return false;
     }

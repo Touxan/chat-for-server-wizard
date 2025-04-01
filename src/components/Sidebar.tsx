@@ -8,7 +8,7 @@ import { PlusCircle, MessageCircle, ChevronDown, ChevronRight, FolderIcon, Termi
 import { cn } from "@/lib/utils";
 import { useConversations, GroupedConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,7 +18,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
   Dialog,
@@ -27,7 +26,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
 import {
@@ -47,11 +45,13 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   const { groupedConversations, isLoading, addConversation, deleteConversation, renameConversation } = useConversations();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { conversationId } = useParams();
   const [newTitle, setNewTitle] = useState("");
   const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
+  const [isProcessingDelete, setIsProcessingDelete] = useState(false);
 
   const handleNewChat = async () => {
     const newConversation = await addConversation("New conversation");
@@ -61,24 +61,36 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   };
   
   const handleDeleteConversation = async (id: string) => {
-    setIsDeleteDialogOpen(false);
-    setDeletingConversationId(null);
-
-    // Stocker l'URL actuelle avant de supprimer
-    const currentPath = window.location.pathname;
-    const deletedConversationPath = `/chat/${id}`;
+    if (isProcessingDelete) return;
     
-    const success = await deleteConversation(id);
-    
-    // Si la suppression a réussi et que l'utilisateur est actuellement
-    // sur la conversation supprimée, rediriger vers /chat
-    if (success && currentPath === deletedConversationPath) {
-      console.log(`Redirecting from deleted conversation ${id} to /chat`);
-      navigate('/chat', { replace: true });
+    try {
+      setIsProcessingDelete(true);
+      
+      // Store current path before deletion
+      const currentPath = location.pathname;
+      const isOnDeletedConversation = currentPath === `/chat/${id}`;
+      
+      const success = await deleteConversation(id);
+      
+      setIsDeleteDialogOpen(false);
+      setDeletingConversationId(null);
+      
+      // If successful and user is currently viewing the deleted conversation,
+      // navigate to /chat
+      if (success && isOnDeletedConversation) {
+        console.log(`Redirecting from deleted conversation ${id} to /chat`);
+        // Use replace: true to prevent back button from returning to deleted conversation
+        navigate('/chat', { replace: true });
+      }
+    } catch (error) {
+      console.error("Error in handleDeleteConversation:", error);
+    } finally {
+      setIsProcessingDelete(false);
     }
   };
   
-  const openDeleteDialog = (id: string) => {
+  const openDeleteDialog = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking delete
     setDeletingConversationId(id);
     setIsDeleteDialogOpen(true);
   };
@@ -91,7 +103,8 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
     }
   };
   
-  const openRenameDialog = (chat: any) => {
+  const openRenameDialog = (chat: any, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking rename
     setEditingConversationId(chat.id);
     setNewTitle(chat.title);
   };
@@ -173,13 +186,14 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                                     variant="ghost" 
                                     size="icon"
                                     className="hover:bg-[hsl(var(--sidebar-hover))]"
+                                    onClick={(e) => e.stopPropagation()} // Prevent navigation
                                   >
                                     <MoreHorizontal className="h-4 w-4" />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem 
-                                    onClick={() => openRenameDialog(chat)}
+                                    onClick={(e: any) => openRenameDialog(chat, e)}
                                     className="cursor-pointer"
                                   >
                                     <Edit className="h-4 w-4 mr-2" />
@@ -187,7 +201,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                                   </DropdownMenuItem>
                                   
                                   <DropdownMenuItem
-                                    onClick={() => openDeleteDialog(chat.id)}
+                                    onClick={(e: any) => openDeleteDialog(chat.id, e)}
                                     className="text-red-500 focus:text-red-500 cursor-pointer"
                                   >
                                     <Trash2 className="h-4 w-4 mr-2" />
@@ -228,6 +242,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="Enter conversation name"
                 className="col-span-3"
+                autoFocus
               />
             </div>
           </div>
@@ -256,14 +271,22 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setDeletingConversationId(null)}>
+            <AlertDialogCancel onClick={() => setDeletingConversationId(null)} disabled={isProcessingDelete}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => deletingConversationId && handleDeleteConversation(deletingConversationId)}
               className="bg-red-500 hover:bg-red-600"
+              disabled={isProcessingDelete}
             >
-              Delete
+              {isProcessingDelete ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
