@@ -16,7 +16,7 @@ interface DeleteDialogProps {
   isOpen: boolean;
   isProcessingDelete: boolean;
   onCancel: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
 }
 
 const DeleteDialog: React.FC<DeleteDialogProps> = ({
@@ -25,6 +25,14 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
   onCancel,
   onConfirm,
 }) => {
+  const handleConfirm = async () => {
+    try {
+      await onConfirm();
+    } catch (error) {
+      console.error("Error during delete confirmation:", error);
+    }
+  };
+
   return (
     <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <AlertDialogContent>
@@ -39,7 +47,7 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction 
-            onClick={onConfirm}
+            onClick={handleConfirm}
             className="bg-red-500 hover:bg-red-600"
             disabled={isProcessingDelete}
           >

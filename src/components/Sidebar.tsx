@@ -46,16 +46,17 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
       
       const success = await deleteConversation(deletingConversationId);
       
-      setIsDeleteDialogOpen(false);
-      setDeletingConversationId(null);
-      
-      // If successful and user is currently viewing the deleted conversation,
-      // navigate to /chat
+      // Navigate first if needed, then close the dialog
       if (success && isOnDeletedConversation) {
         console.log(`Redirecting from deleted conversation ${deletingConversationId} to /chat`);
         // Use replace: true to prevent back button from returning to deleted conversation
         navigate('/chat', { replace: true });
       }
+      
+      // Reset state
+      setIsDeleteDialogOpen(false);
+      setDeletingConversationId(null);
+      
     } catch (error) {
       console.error("Error in handleDeleteConversation:", error);
     } finally {
