@@ -1,82 +1,139 @@
 
-import { useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { updateMessageAfterCommand } from "@/utils/messageUtils";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { MessageType } from "@/types/chat";
+import { useToast } from "@/hooks/use-toast";
 
 export const useMessageCommands = (
-  conversationId: string | undefined,
-  updateMessages: (messageId: string, updatedMessage: any) => void
+  conversationId?: string,
+  updateMessageInState?: (messageId: string, updatedFields: Partial<MessageType>) => void
 ) => {
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const { toast } = useToast();
 
+  // Handle approval of command
   const handleApproveCommand = useCallback(async (messageId: string) => {
-    if (!conversationId) return;
+    if (!conversationId || !messageId || isProcessing) return;
+    setIsProcessing(true);
     
     try {
-      const messageToUpdate = await getMessageById(messageId);
-      if (!messageToUpdate || !messageToUpdate.command) return;
+      // Get the current message to obtain the command
+      const { data: messageData, error: messageError } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("id", messageId)
+        .eq("conversation_id", conversationId)
+        .single();
       
-      const updatedContent = `${messageToUpdate.content}\n\nCommand executed successfully: ${messageToUpdate.command.text}`;
-      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
+      if (messageError || !messageData) throw new Error("Failed to fetch message data");
       
-      // Update the message in local state immediately
-      if (updatedMessage) {
-        updateMessages(messageId, updatedMessage);
+      // Extract command details
+      const command = messageData.command;
+      
+      if (!command || typeof command === 'string') {
+        throw new Error("Invalid command format");
       }
+      
+      const commandText = command.text || "";
+      
+      // Update message to show command is being executed
+      if (updateMessageInState) {
+        updateMessageInState(messageId, {
+          content: `Executing command: ${commandText}...`,
+        });
+      }
+      
+      // Make API call to execute the command
+      const { data: executeData, error: executeError } = await supabase.functions.invoke(
+        "execute-command",
+        {
+          body: {
+            command: commandText,
+            messageId,
+            conversationId,
+          },
+        }
+      );
+      
+      if (executeError) throw executeError;
+      
+      // Remove command from message as it's been processed
+      const { error: updateError } = await supabase
+        .from("messages")
+        .update({ 
+          command: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", messageId);
+      
+      if (updateError) throw updateError;
+      
+      // Show success notification
+      toast({
+        title: "Command executed",
+        description: "The command was successfully executed.",
+      });
+      
+      if (updateMessageInState) {
+        updateMessageInState(messageId, {
+          command: null
+        });
+      }
+      
     } catch (error: any) {
-      console.error("Error approving command:", error);
+      console.error("Error executing command:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Unable to approve command.",
+        title: "Command execution failed",
+        description: error.message || "An error occurred while executing the command.",
       });
+    } finally {
+      setIsProcessing(false);
     }
-  }, [conversationId, toast, updateMessages]);
+  }, [conversationId, isProcessing, toast, updateMessageInState]);
 
+  // Handle decline of command
   const handleDeclineCommand = useCallback(async (messageId: string) => {
-    if (!conversationId) return;
+    if (!conversationId || !messageId || isProcessing) return;
+    setIsProcessing(true);
     
     try {
-      const messageToUpdate = await getMessageById(messageId);
-      if (!messageToUpdate || !messageToUpdate.command) return;
+      // Update the message to remove the command
+      const { error: updateError } = await supabase
+        .from("messages")
+        .update({ 
+          command: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", messageId);
       
-      const updatedContent = `${messageToUpdate.content}\n\nCommand execution cancelled.`;
-      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
+      if (updateError) throw updateError;
       
-      // Update the message in local state immediately
-      if (updatedMessage) {
-        updateMessages(messageId, updatedMessage);
+      if (updateMessageInState) {
+        updateMessageInState(messageId, {
+          command: null
+        });
       }
+      
+      toast({
+        title: "Command declined",
+        description: "The command was declined and will not be executed.",
+      });
     } catch (error: any) {
       console.error("Error declining command:", error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Unable to decline command.",
+        title: "Failed to decline command",
+        description: error.message || "An error occurred while declining the command.",
       });
+    } finally {
+      setIsProcessing(false);
     }
-  }, [conversationId, toast, updateMessages]);
-
-  // Helper function to get a message by ID
-  const getMessageById = useCallback(async (messageId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('id', messageId)
-        .single();
-        
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error("Error fetching message:", error);
-      return null;
-    }
-  }, []);
+  }, [conversationId, isProcessing, toast, updateMessageInState]);
 
   return {
     handleApproveCommand,
-    handleDeclineCommand
+    handleDeclineCommand,
+    isProcessing,
   };
 };
