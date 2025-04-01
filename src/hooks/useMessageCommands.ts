@@ -3,6 +3,7 @@ import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { MessageType } from "@/types/chat";
 import { useToast } from "@/hooks/use-toast";
+import { Json } from "@/integrations/supabase/types";
 
 export const useMessageCommands = (
   conversationId?: string,
@@ -30,11 +31,19 @@ export const useMessageCommands = (
       // Extract command details
       const command = messageData.command;
       
-      if (!command || typeof command === 'string') {
+      // Type guard to check if command is a properly structured object
+      const isValidCommandObject = (cmd: any): cmd is { text: string; description: string; risk: string } => {
+        return cmd !== null && 
+               typeof cmd === 'object' && 
+               'text' in cmd && 
+               typeof cmd.text === 'string';
+      };
+      
+      if (!command || !isValidCommandObject(command)) {
         throw new Error("Invalid command format");
       }
       
-      const commandText = command.text || "";
+      const commandText = command.text;
       
       // Update message to show command is being executed
       if (updateMessageInState) {
@@ -137,3 +146,4 @@ export const useMessageCommands = (
     isProcessing,
   };
 };
+
