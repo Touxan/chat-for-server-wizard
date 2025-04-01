@@ -4,7 +4,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { ChevronDown, ChevronRight, FolderIcon, Terminal, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GroupedConversations } from "@/hooks/useConversations";
+import { GroupedConversations } from "@/hooks/conversation/useGroupConversations";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   DropdownMenu,

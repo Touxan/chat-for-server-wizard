@@ -2,7 +2,7 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { GroupedConversations } from "@/hooks/useConversations";
+import { GroupedConversations } from "@/hooks/conversation/useGroupConversations";
 import ConversationGroup from "./ConversationGroup";
 
 interface ConversationListProps {
