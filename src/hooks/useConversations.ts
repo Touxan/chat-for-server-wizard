@@ -76,6 +76,48 @@ export const useConversations = () => {
     }
   };
   
+  // Function to rename a conversation
+  const renameConversation = async (id: string, newTitle: string) => {
+    if (!user || !id || !newTitle.trim()) return false;
+    
+    try {
+      console.log(`Attempting to rename conversation ${id} to "${newTitle}"`);
+      
+      const { data, error } = await supabase
+        .from('conversations')
+        .update({ title: newTitle })
+        .eq('id', id)
+        .select();
+        
+      if (error) {
+        console.error('Error renaming conversation:', error);
+        throw error;
+      }
+      
+      console.log('Renamed conversation:', data);
+      
+      // Update local state
+      setConversations(prev => 
+        prev.map(conv => conv.id === id ? { ...conv, title: newTitle } : conv)
+      );
+      
+      toast({
+        title: "Renamed",
+        description: "Conversation has been renamed."
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error('Error renaming conversation:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Unable to rename the conversation.',
+      });
+      return false;
+    }
+  };
+  
   // Function to delete a conversation
   const deleteConversation = async (id: string) => {
     if (!user) return false;
@@ -87,29 +129,27 @@ export const useConversations = () => {
       const { data: messagesData, error: messagesError } = await supabase
         .from('messages')
         .delete()
-        .eq('conversation_id', id)
-        .select();
+        .eq('conversation_id', id);
       
       if (messagesError) {
         console.error('Error deleting messages:', messagesError);
         throw messagesError;
       }
       
-      console.log(`Deleted ${messagesData?.length || 0} messages`);
+      console.log(`Deleted messages for conversation ${id}`);
       
       // Then delete the conversation
       const { data: conversationData, error: conversationError } = await supabase
         .from('conversations')
         .delete()
-        .eq('id', id)
-        .select();
+        .eq('id', id);
         
       if (conversationError) {
         console.error('Error deleting conversation:', conversationError);
         throw conversationError;
       }
       
-      console.log('Deleted conversation:', conversationData);
+      console.log('Deleted conversation with ID:', id);
       
       // Update local state
       setConversations(prev => prev.filter(conv => conv.id !== id));
@@ -197,6 +237,7 @@ export const useConversations = () => {
     isLoading,
     fetchConversations,
     addConversation,
+    renameConversation,
     deleteConversation,
   };
 };

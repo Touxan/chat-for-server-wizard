@@ -1,10 +1,10 @@
 
-import React, { forwardRef } from "react";
+import React, { forwardRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { PlusCircle, MessageCircle, ChevronDown, ChevronRight, FolderIcon, Terminal, Loader2, Trash2 } from "lucide-react";
+import { PlusCircle, MessageCircle, ChevronDown, ChevronRight, FolderIcon, Terminal, Loader2, Trash2, Edit } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConversations, GroupedConversations } from "@/hooks/useConversations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,16 +20,30 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface SidebarProps {
   isOpen: boolean;
 }
 
 const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
-  const { groupedConversations, isLoading, addConversation, deleteConversation } = useConversations();
+  const { groupedConversations, isLoading, addConversation, deleteConversation, renameConversation } = useConversations();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { conversationId } = useParams();
+  const [newTitle, setNewTitle] = useState("");
+  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
 
   const handleNewChat = async () => {
     const newConversation = await addConversation("New conversation");
@@ -43,6 +57,19 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
     if (success && id === conversationId) {
       navigate('/chat');
     }
+  };
+  
+  const handleRenameConversation = async (id: string) => {
+    if (newTitle.trim()) {
+      await renameConversation(id, newTitle);
+      setEditingConversationId(null);
+      setNewTitle("");
+    }
+  };
+  
+  const openRenameDialog = (chat: any) => {
+    setEditingConversationId(chat.id);
+    setNewTitle(chat.title);
   };
 
   return (
@@ -112,34 +139,85 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                               </div>
                             </Button>
                             
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  className="opacity-0 group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-500"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Are you sure you want to delete this conversation? This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction 
-                                    onClick={() => handleDeleteConversation(chat.id)}
-                                    className="bg-red-500 hover:bg-red-600"
+                            <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon"
+                                    className="hover:bg-blue-500/10 hover:text-blue-500"
+                                    onClick={() => openRenameDialog(chat)}
                                   >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle>Rename Conversation</DialogTitle>
+                                    <DialogDescription>
+                                      Enter a new name for this conversation.
+                                    </DialogDescription>
+                                  </DialogHeader>
+                                  <div className="flex items-center space-y-4 py-2">
+                                    <div className="grid flex-1 gap-2">
+                                      <Label htmlFor="name" className="sr-only">
+                                        Name
+                                      </Label>
+                                      <Input
+                                        id="name"
+                                        value={newTitle}
+                                        onChange={(e) => setNewTitle(e.target.value)}
+                                        placeholder="Enter conversation name"
+                                        className="col-span-3"
+                                      />
+                                    </div>
+                                  </div>
+                                  <DialogFooter className="sm:justify-start">
+                                    <DialogClose asChild>
+                                      <Button variant="secondary" className="mr-2">
+                                        Cancel
+                                      </Button>
+                                    </DialogClose>
+                                    <Button 
+                                      type="submit" 
+                                      onClick={() => handleRenameConversation(chat.id)}
+                                      disabled={!newTitle.trim()}
+                                    >
+                                      Save
+                                    </Button>
+                                  </DialogFooter>
+                                </DialogContent>
+                              </Dialog>
+                            
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="hover:bg-red-500/10 hover:text-red-500"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this conversation? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      onClick={() => handleDeleteConversation(chat.id)}
+                                      className="bg-red-500 hover:bg-red-600"
+                                    >
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
                           </div>
                         ))}
                       </div>
