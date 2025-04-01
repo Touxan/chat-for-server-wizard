@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
@@ -33,7 +34,9 @@ export const useConversationRealtime = (user: any, fetchConversations: () => Pro
           fetchConversations();
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Channel subscription status:', status);
+      });
     
     // Store the channel reference
     channelRef.current = channel;

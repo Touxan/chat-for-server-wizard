@@ -85,32 +85,10 @@ export const useConversationMutations = (user: any, setConversations: React.Disp
   const deleteConversation = async (id: string) => {
     if (!user || !id) return false;
     
+    console.log(`Starting deletion of conversation ${id}`);
+    
     try {
-      console.log(`Attempting to delete conversation with ID: ${id}`);
-      
-      // First check if conversation exists and belongs to user
-      const { data: conversationData, error: checkError } = await supabase
-        .from('conversations')
-        .select('id, user_id')
-        .eq('id', id)
-        .maybeSingle();
-      
-      if (checkError) {
-        console.error('Error checking conversation:', checkError);
-        throw checkError;
-      }
-      
-      if (!conversationData) {
-        console.error(`Conversation ${id} not found`);
-        throw new Error("Conversation not found");
-      }
-      
-      if (conversationData.user_id !== user.id) {
-        console.error(`Conversation ${id} doesn't belong to user ${user.id}`);
-        throw new Error("You don't have permission to delete this conversation");
-      }
-      
-      // Delete all messages associated with the conversation first
+      // First delete all messages associated with the conversation
       const { error: messagesError } = await supabase
         .from('messages')
         .delete()
@@ -124,18 +102,17 @@ export const useConversationMutations = (user: any, setConversations: React.Disp
       console.log(`Successfully deleted messages for conversation ${id}`);
       
       // Then delete the conversation itself
-      const { error: conversationError, data: deleteData } = await supabase
+      const { error: conversationError } = await supabase
         .from('conversations')
         .delete()
-        .eq('id', id)
-        .select();
+        .eq('id', id);
         
       if (conversationError) {
         console.error('Error deleting conversation:', conversationError);
         throw conversationError;
       }
       
-      console.log('Deleted conversation with ID:', id, 'Result:', deleteData);
+      console.log('Successfully deleted conversation with ID:', id);
       
       // Update local state by filtering out the deleted conversation
       setConversations(prev => prev.filter(conv => conv.id !== id));

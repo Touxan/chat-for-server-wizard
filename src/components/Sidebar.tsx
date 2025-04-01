@@ -44,21 +44,28 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
       const currentPath = location.pathname;
       const isOnDeletedConversation = currentPath === `/chat/${deletingConversationId}`;
       
+      console.log(`Current path: ${currentPath}, deleting conversation: ${deletingConversationId}`);
+      console.log(`Is on deleted conversation: ${isOnDeletedConversation}`);
+      
       const success = await deleteConversation(deletingConversationId);
       
-      // Navigate first if needed, then close the dialog
+      // Reset state first to avoid UI freeze
+      setIsDeleteDialogOpen(false);
+      
+      // Navigate if needed AFTER closing the dialog
       if (success && isOnDeletedConversation) {
         console.log(`Redirecting from deleted conversation ${deletingConversationId} to /chat`);
         // Use replace: true to prevent back button from returning to deleted conversation
         navigate('/chat', { replace: true });
       }
       
-      // Reset state
-      setIsDeleteDialogOpen(false);
+      // Complete reset of state
       setDeletingConversationId(null);
       
     } catch (error) {
       console.error("Error in handleDeleteConversation:", error);
+      // Ensure dialog is closed even on error
+      setIsDeleteDialogOpen(false);
     } finally {
       setIsProcessingDelete(false);
     }

@@ -34,7 +34,11 @@ const DeleteDialog: React.FC<DeleteDialogProps> = ({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={(open) => !open && onCancel()}>
+    <AlertDialog open={isOpen} onOpenChange={(open) => {
+      if (!open && !isProcessingDelete) {
+        onCancel();
+      }
+    }}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
