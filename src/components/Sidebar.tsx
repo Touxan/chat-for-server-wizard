@@ -50,6 +50,8 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   const { conversationId } = useParams();
   const [newTitle, setNewTitle] = useState("");
   const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
 
   const handleNewChat = async () => {
     const newConversation = await addConversation("New conversation");
@@ -59,10 +61,26 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   };
   
   const handleDeleteConversation = async (id: string) => {
+    setIsDeleteDialogOpen(false);
+    setDeletingConversationId(null);
+
+    // Stocker l'URL actuelle avant de supprimer
+    const currentPath = window.location.pathname;
+    const deletedConversationPath = `/chat/${id}`;
+    
     const success = await deleteConversation(id);
-    if (success && id === conversationId) {
-      navigate('/chat');
+    
+    // Si la suppression a réussi et que l'utilisateur est actuellement
+    // sur la conversation supprimée, rediriger vers /chat
+    if (success && currentPath === deletedConversationPath) {
+      console.log(`Redirecting from deleted conversation ${id} to /chat`);
+      navigate('/chat', { replace: true });
     }
+  };
+  
+  const openDeleteDialog = (id: string) => {
+    setDeletingConversationId(id);
+    setIsDeleteDialogOpen(true);
   };
   
   const handleRenameConversation = async (id: string) => {
@@ -133,7 +151,10 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                           <div key={chat.id} className="flex group">
                             <Button
                               variant="ghost"
-                              className="flex-1 justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm"
+                              className={cn(
+                                "flex-1 justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm",
+                                chat.id === conversationId && "bg-[hsl(var(--sidebar-hover))] text-[hsl(var(--sidebar-text))]"
+                              )}
                               onClick={() => navigate(`/chat/${chat.id}`)}
                             >
                               <Terminal className="mr-2 h-4 w-4 text-[hsl(var(--primary))]" />
@@ -165,34 +186,13 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
                                     Rename
                                   </DropdownMenuItem>
                                   
-                                  <AlertDialog>
-                                    <AlertDialogTrigger asChild>
-                                      <DropdownMenuItem
-                                        onSelect={(e) => e.preventDefault()}
-                                        className="text-red-500 focus:text-red-500 cursor-pointer"
-                                      >
-                                        <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete
-                                      </DropdownMenuItem>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                      <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                          Are you sure you want to delete this conversation? This action cannot be undone.
-                                        </AlertDialogDescription>
-                                      </AlertDialogHeader>
-                                      <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction 
-                                          onClick={() => handleDeleteConversation(chat.id)}
-                                          className="bg-red-500 hover:bg-red-600"
-                                        >
-                                          Delete
-                                        </AlertDialogAction>
-                                      </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                  </AlertDialog>
+                                  <DropdownMenuItem
+                                    onClick={() => openDeleteDialog(chat.id)}
+                                    className="text-red-500 focus:text-red-500 cursor-pointer"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete
+                                  </DropdownMenuItem>
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -245,6 +245,29 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Conversation</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this conversation? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingConversationId(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => deletingConversationId && handleDeleteConversation(deletingConversationId)}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 });

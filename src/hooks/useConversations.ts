@@ -118,14 +118,32 @@ export const useConversations = () => {
     }
   };
   
-  // Function to delete a conversation
+  // Function to delete a conversation - Fixed with proper error handling and transaction approach
   const deleteConversation = async (id: string) => {
     if (!user || !id) return false;
     
     try {
       console.log(`Attempting to delete conversation with ID: ${id}`);
       
-      // First delete all messages associated with the conversation
+      // First check if conversation exists and belongs to user
+      const { data: conversationData, error: checkError } = await supabase
+        .from('conversations')
+        .select('id')
+        .eq('id', id)
+        .eq('user_id', user.id)
+        .single();
+      
+      if (checkError) {
+        console.error('Error checking conversation:', checkError);
+        throw checkError;
+      }
+      
+      if (!conversationData) {
+        console.error(`Conversation ${id} not found or doesn't belong to user ${user.id}`);
+        throw new Error("Conversation not found");
+      }
+      
+      // Delete all messages associated with the conversation first
       const { error: messagesError } = await supabase
         .from('messages')
         .delete()
