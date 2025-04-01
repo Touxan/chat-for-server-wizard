@@ -1,200 +1,70 @@
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { MessageType } from "@/types/chat";
-import { supabase } from "@/integrations/supabase/client";
-import { checkConversationExists, setupConversationListeners } from "@/utils/conversationUtils";
-import { 
-  convertToMessageType, 
-  fetchMessagesForConversation, 
-  sendUserMessage, 
-  sendBotResponse, 
-  updateMessageAfterCommand, 
-  setupMessageListeners 
-} from "@/utils/messageUtils";
-import { useBotResponseGenerator } from "@/hooks/useBotResponseGenerator";
+import { useConversationOperations } from "@/hooks/useConversationOperations";
+import { useMessageOperations } from "@/hooks/useMessageOperations";
+import { useMessageCommands } from "@/hooks/useMessageCommands";
 
 export const useChatMessagesWithSupabase = (conversationId?: string) => {
-  const [messages, setMessages] = useState<MessageType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isBotTyping, setIsBotTyping] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const { generateBotResponse } = useBotResponseGenerator();
-
-  // Function to fetch messages from a conversation
-  const fetchMessages = useCallback(async () => {
-    if (!conversationId || !user) return;
-    
-    setIsLoading(true);
-    try {
-      // First check if the conversation exists
-      const conversationExists = await checkConversationExists(conversationId);
-      
-      // If conversation doesn't exist, redirect to main chat page
-      if (!conversationExists) {
-        console.log(`Conversation ${conversationId} does not exist, redirecting to /chat`);
-        toast({
-          variant: "destructive",
-          title: "Conversation Not Found",
-          description: "This conversation no longer exists.",
-        });
-        navigate('/chat');
-        return;
-      }
-      
-      const data = await fetchMessagesForConversation(conversationId);
-
-      const convertedMessages = data?.map(convertToMessageType) || [];
-      setMessages(convertedMessages);
-    } catch (error: any) {
-      console.error("Error fetching messages:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Unable to retrieve messages.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [conversationId, user, navigate, toast]);
-
-  const handleSendMessage = async (message: string) => {
-    if (!conversationId || !user) return;
-    
-    try {
-      // Add user message to local state immediately for instant feedback
-      const tempUserMsgId = `temp-${Date.now()}`;
-      const tempUserMsg: MessageType = {
-        id: tempUserMsgId,
-        content: message,
-        isUser: true,
-        timestamp: new Date().toLocaleTimeString(),
-      };
-      
-      setMessages(prev => [...prev, tempUserMsg]);
-      
-      // Actually add user message to the database
-      const userMessage = await sendUserMessage(conversationId, message);
-      
-      // Show bot typing indicator
-      setIsBotTyping(true);
-      
-      // Get bot response from the API
-      const { botContent, command } = await generateBotResponse(message);
-      
-      // Add bot response to the database and update local state
-      const botMessage = await sendBotResponse(conversationId, botContent, command);
-      
-      // Update local state with the bot response
-      if (botMessage) {
-        const botMessageConverted = convertToMessageType(botMessage);
-        setMessages(prev => [
-          ...prev.filter(msg => msg.id !== tempUserMsgId), // Remove temp user message
-          convertToMessageType(userMessage), // Add real user message
-          botMessageConverted // Add bot response
-        ]);
-      }
-      
-      // Hide bot typing indicator when response is received
-      setIsBotTyping(false);
-    } catch (error: any) {
-      console.error("Error sending message:", error);
-      setIsBotTyping(false);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Unable to send message.",
-      });
-    }
-  };
-
-  const handleApproveCommand = async (messageId: string) => {
-    if (!conversationId || !user) return;
-    
-    try {
-      const messageToUpdate = messages.find(msg => msg.id === messageId);
-      if (!messageToUpdate || !messageToUpdate.command) return;
-      
-      const updatedContent = `${messageToUpdate.content}\n\nCommand executed successfully: ${messageToUpdate.command.text}`;
-      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
-      
-      // Update the message in local state immediately
-      if (updatedMessage) {
-        setMessages(prev => 
-          prev.map(msg => msg.id === messageId ? convertToMessageType(updatedMessage) : msg)
-        );
-      }
-    } catch (error: any) {
-      console.error("Error approving command:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Unable to approve command.",
-      });
-    }
-  };
-
-  const handleDeclineCommand = async (messageId: string) => {
-    if (!conversationId || !user) return;
-    
-    try {
-      const messageToUpdate = messages.find(msg => msg.id === messageId);
-      if (!messageToUpdate || !messageToUpdate.command) return;
-      
-      const updatedContent = `${messageToUpdate.content}\n\nCommand execution cancelled.`;
-      const updatedMessage = await updateMessageAfterCommand(messageId, updatedContent);
-      
-      // Update the message in local state immediately
-      if (updatedMessage) {
-        setMessages(prev => 
-          prev.map(msg => msg.id === messageId ? convertToMessageType(updatedMessage) : msg)
-        );
-      }
-    } catch (error: any) {
-      console.error("Error declining command:", error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Unable to decline command.",
-      });
-    }
-  };
+  
+  const { validateConversation, setupListeners: setupConversationListeners } = useConversationOperations();
+  
+  const { 
+    messages, 
+    isLoading, 
+    isBotTyping, 
+    fetchMessages, 
+    handleSendMessage, 
+    updateMessageInState,
+    setupListeners: setupMessageListeners
+  } = useMessageOperations(conversationId, user);
+  
+  const { 
+    handleApproveCommand, 
+    handleDeclineCommand 
+  } = useMessageCommands(conversationId, updateMessageInState);
 
   // Effect to load messages on mount or conversation change
   useEffect(() => {
     if (conversationId && user) {
-      fetchMessages();
+      // First validate that the conversation exists
+      validateConversation(conversationId).then(exists => {
+        if (exists) {
+          fetchMessages();
+        }
+      });
     }
-  }, [conversationId, user, fetchMessages]);
+  }, [conversationId, user, validateConversation, fetchMessages]);
 
-  // Listen for real-time updates to messages
+  // Listen for real-time updates to messages and conversations
   useEffect(() => {
     if (!conversationId || !user) return;
     
-    const messageChannel = setupMessageListeners(conversationId, fetchMessages);
+    // Setup message listeners
+    const removeMessageListeners = setupMessageListeners();
     
-    const conversationsChannel = setupConversationListeners(
-      conversationId,
+    // Setup conversation listeners
+    const removeConversationListeners = setupConversationListeners(
+      conversationId, 
       fetchMessages,
-      () => {
-        toast({
-          variant: "destructive",
-          title: "Conversation Deleted",
-          description: "This conversation has been deleted.",
-        });
-        navigate('/chat');
-      }
+      () => navigate('/chat')
     );
 
     return () => {
-      if (messageChannel) supabase.removeChannel(messageChannel);
-      if (conversationsChannel) supabase.removeChannel(conversationsChannel);
+      if (removeMessageListeners) removeMessageListeners();
+      if (removeConversationListeners) removeConversationListeners();
     };
-  }, [conversationId, user, navigate, toast, fetchMessages]);
+  }, [
+    conversationId, 
+    user, 
+    navigate, 
+    fetchMessages, 
+    setupMessageListeners, 
+    setupConversationListeners
+  ]);
 
   return {
     messages,
