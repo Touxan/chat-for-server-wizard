@@ -40,7 +40,7 @@ export const useConversations = () => {
     } else {
       setConversations([]);
     }
-  }, [user]);
+  }, [user, fetchConversations, setConversations]);
 
   return {
     conversations,
