@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { Conversation } from '@/integrations/supabase/schema';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -33,14 +33,21 @@ export const useConversations = () => {
   // Initialize real-time subscription
   useConversationRealtime(user, fetchConversations);
 
-  // Effect to load conversations at mount
-  useEffect(() => {
+  // Memoized effect to load conversations at mount
+  const loadConversations = useCallback(() => {
     if (user) {
+      console.log("Loading conversations for user:", user.id);
       fetchConversations();
     } else {
+      console.log("No user, clearing conversations");
       setConversations([]);
     }
   }, [user, fetchConversations, setConversations]);
+
+  // Effect to load conversations when user changes
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
 
   return {
     conversations,

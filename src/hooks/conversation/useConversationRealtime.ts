@@ -11,6 +11,8 @@ export const useConversationRealtime = (user: any, fetchConversations: () => Pro
   useEffect(() => {
     if (!user) return;
     
+    console.log('Setting up realtime listener for conversations');
+    
     // Clean up previous channel if it exists
     if (channelRef.current) {
       console.log('Cleaning up previous channel before creating a new one');
@@ -18,9 +20,12 @@ export const useConversationRealtime = (user: any, fetchConversations: () => Pro
       channelRef.current = null;
     }
     
-    // Create a new channel
+    // Create a new channel with a unique name to avoid conflicts
+    const channelName = `schema-db-changes-${Date.now()}`;
+    console.log(`Creating new channel: ${channelName}`);
+    
     const channel = supabase
-      .channel('schema-db-changes')
+      .channel(channelName)
       .on(
         'postgres_changes',
         {

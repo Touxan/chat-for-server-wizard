@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { GroupedConversations } from "@/hooks/conversation/useGroupConversations";
 import ConversationGroup from "./ConversationGroup";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ConversationListProps {
   user: any;
@@ -20,34 +21,58 @@ const ConversationList: React.FC<ConversationListProps> = ({
   openRenameDialog,
   openDeleteDialog,
 }) => {
-  return (
-    <ScrollArea className="h-[calc(100vh-180px)]">
-      {!user ? (
+  if (!user) {
+    return (
+      <ScrollArea className="h-[calc(100vh-180px)]">
         <div className="text-center p-4 text-[hsl(var(--sidebar-text))/60]">
           Login to see your conversations
         </div>
-      ) : isLoading ? (
-        <div className="flex items-center justify-center p-4">
-          <Loader2 className="h-4 w-4 animate-spin text-[hsl(var(--primary))]" />
-          <span className="ml-2 text-[hsl(var(--sidebar-text))/60]">Loading...</span>
+      </ScrollArea>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <ScrollArea className="h-[calc(100vh-180px)]">
+        <div className="space-y-2 p-1">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="px-1 py-2">
+              <Skeleton className="h-4 w-3/4 mb-2" />
+              <div className="space-y-1">
+                {[1, 2].map((j) => (
+                  <Skeleton key={j} className="h-8 w-full rounded-md" />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ) : groupedConversations.length === 0 ? (
+      </ScrollArea>
+    );
+  }
+
+  if (groupedConversations.length === 0) {
+    return (
+      <ScrollArea className="h-[calc(100vh-180px)]">
         <div className="text-center p-4 text-[hsl(var(--sidebar-text))/60]">
           No conversations found
         </div>
-      ) : (
-        <div className="space-y-2">
-          {groupedConversations.map((group, index) => (
-            <ConversationGroup
-              key={index}
-              group={group}
-              index={index}
-              openRenameDialog={openRenameDialog}
-              openDeleteDialog={openDeleteDialog}
-            />
-          ))}
-        </div>
-      )}
+      </ScrollArea>
+    );
+  }
+
+  return (
+    <ScrollArea className="h-[calc(100vh-180px)]">
+      <div className="space-y-2">
+        {groupedConversations.map((group, index) => (
+          <ConversationGroup
+            key={index}
+            group={group}
+            index={index}
+            openRenameDialog={openRenameDialog}
+            openDeleteDialog={openDeleteDialog}
+          />
+        ))}
+      </div>
     </ScrollArea>
   );
 };
