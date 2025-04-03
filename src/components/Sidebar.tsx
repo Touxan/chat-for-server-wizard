@@ -9,7 +9,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 import NewConversationButton from "./sidebar/NewConversationButton";
 import ConversationList from "./sidebar/ConversationList";
 import RenameDialog from "./sidebar/RenameDialog";
-import DeleteDialog from "./sidebar/DeleteDialog";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -23,9 +22,6 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   
   const [newTitle, setNewTitle] = useState("");
   const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [deletingConversationId, setDeletingConversationId] = useState<string | null>(null);
-  const [isProcessingDelete, setIsProcessingDelete] = useState(false);
 
   const handleNewChat = async () => {
     const newConversation = await addConversation("New conversation");
@@ -34,47 +30,29 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
     }
   };
   
-  const handleDeleteConversation = async () => {
-    if (isProcessingDelete || !deletingConversationId) return;
+  const handleDeleteConversation = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent navigation when clicking delete
     
     try {
-      setIsProcessingDelete(true);
-      
       // Store current path before deletion
       const currentPath = location.pathname;
-      const isOnDeletedConversation = currentPath === `/chat/${deletingConversationId}`;
+      const isOnDeletedConversation = currentPath === `/chat/${id}`;
       
-      console.log(`Current path: ${currentPath}, deleting conversation: ${deletingConversationId}`);
+      console.log(`Current path: ${currentPath}, deleting conversation: ${id}`);
       console.log(`Is on deleted conversation: ${isOnDeletedConversation}`);
       
-      const success = await deleteConversation(deletingConversationId);
+      const success = await deleteConversation(id);
       
-      // Reset state first to avoid UI freeze
-      setIsDeleteDialogOpen(false);
-      
-      // Navigate if needed AFTER closing the dialog
+      // Navigate if needed
       if (success && isOnDeletedConversation) {
-        console.log(`Redirecting from deleted conversation ${deletingConversationId} to /chat`);
+        console.log(`Redirecting from deleted conversation ${id} to /chat`);
         // Use replace: true to prevent back button from returning to deleted conversation
         navigate('/chat', { replace: true });
       }
       
-      // Complete reset of state
-      setDeletingConversationId(null);
-      
     } catch (error) {
       console.error("Error in handleDeleteConversation:", error);
-      // Ensure dialog is closed even on error
-      setIsDeleteDialogOpen(false);
-    } finally {
-      setIsProcessingDelete(false);
     }
-  };
-  
-  const openDeleteDialog = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent navigation when clicking delete
-    setDeletingConversationId(id);
-    setIsDeleteDialogOpen(true);
   };
   
   const handleRenameConversation = () => {
@@ -94,11 +72,6 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   const closeRenameDialog = () => {
     setEditingConversationId(null);
     setNewTitle("");
-  };
-
-  const closeDeleteDialog = () => {
-    setIsDeleteDialogOpen(false);
-    setDeletingConversationId(null);
   };
 
   return (
@@ -124,7 +97,7 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
             isLoading={isLoading}
             groupedConversations={groupedConversations}
             openRenameDialog={openRenameDialog}
-            openDeleteDialog={openDeleteDialog}
+            openDeleteDialog={handleDeleteConversation}
           />
         </div>
       </div>
@@ -137,13 +110,6 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
         onTitleChange={setNewTitle}
         onRename={handleRenameConversation}
       />
-
-      <DeleteDialog 
-        isOpen={isDeleteDialogOpen}
-        isProcessingDelete={isProcessingDelete}
-        onCancel={closeDeleteDialog}
-        onConfirm={handleDeleteConversation}
-      />
     </div>
   );
 });
@@ -151,3 +117,4 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
 Sidebar.displayName = "Sidebar";
 
 export default Sidebar;
+
