@@ -81,29 +81,36 @@ export const useConversationMutations = (user: any, setConversations: React.Disp
     }
   };
   
-  // Function to delete a conversation - updated to use the webhook
+  // Function to delete a conversation - updated to directly use Supabase
   const deleteConversation = async (id: string) => {
     if (!user || !id) return false;
     
-    console.log(`Starting deletion of conversation ${id} using webhook`);
+    console.log(`Starting deletion of conversation ${id} using Supabase`);
     
     try {
-      // Use the external webhook for deletion
-      const response = await fetch('https://sup-n8n.unipile.com/webhook/6bfc7bc1-8a48-4f5c-800b-045a8946c246', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id }),
-      });
+      // First, delete related messages
+      const { error: messagesError } = await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', id);
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Webhook error (${response.status}):`, errorText);
-        throw new Error(`Webhook returned status ${response.status}`);
+      if (messagesError) {
+        console.error('Error deleting messages:', messagesError);
+        throw messagesError;
       }
       
-      console.log('Successfully deleted conversation with webhook:', id);
+      // Then, delete the conversation
+      const { error: conversationError } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', id);
+      
+      if (conversationError) {
+        console.error('Error deleting conversation:', conversationError);
+        throw conversationError;
+      }
+      
+      console.log('Successfully deleted conversation with Supabase:', id);
       
       // Update local state by filtering out the deleted conversation
       setConversations(prev => prev.filter(conv => conv.id !== id));
