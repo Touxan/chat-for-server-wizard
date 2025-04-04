@@ -81,38 +81,29 @@ export const useConversationMutations = (user: any, setConversations: React.Disp
     }
   };
   
-  // Function to delete a conversation
+  // Function to delete a conversation - updated to use the webhook
   const deleteConversation = async (id: string) => {
     if (!user || !id) return false;
     
-    console.log(`Starting deletion of conversation ${id}`);
+    console.log(`Starting deletion of conversation ${id} using webhook`);
     
     try {
-      // First delete all messages associated with the conversation
-      const { error: messagesError } = await supabase
-        .from('messages')
-        .delete()
-        .eq('conversation_id', id);
+      // Use the external webhook for deletion
+      const response = await fetch('https://sup-n8n.unipile.com/webhook/6bfc7bc1-8a48-4f5c-800b-045a8946c246', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
       
-      if (messagesError) {
-        console.error('Error deleting messages:', messagesError);
-        throw messagesError;
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Webhook error (${response.status}):`, errorText);
+        throw new Error(`Webhook returned status ${response.status}`);
       }
       
-      console.log(`Successfully deleted messages for conversation ${id}`);
-      
-      // Then delete the conversation itself
-      const { error: conversationError } = await supabase
-        .from('conversations')
-        .delete()
-        .eq('id', id);
-        
-      if (conversationError) {
-        console.error('Error deleting conversation:', conversationError);
-        throw conversationError;
-      }
-      
-      console.log('Successfully deleted conversation with ID:', id);
+      console.log('Successfully deleted conversation with webhook:', id);
       
       // Update local state by filtering out the deleted conversation
       setConversations(prev => prev.filter(conv => conv.id !== id));

@@ -117,4 +117,3 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
 Sidebar.displayName = "Sidebar";
 
 export default Sidebar;
-
