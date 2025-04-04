@@ -20,6 +20,7 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
           size="icon" 
           onClick={toggleSidebar} 
           className="text-[hsl(var(--header-text))] hover:bg-[hsl(var(--header-accent))] mr-3"
+          aria-label="Toggle sidebar"
         >
           <Menu size={22} />
         </Button>

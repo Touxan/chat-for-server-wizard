@@ -9,7 +9,8 @@ import SidebarOverlay from "@/components/SidebarOverlay";
 import { useSidebar } from "@/hooks/useSidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { useChatMessagesWithSupabase } from "@/hooks/useChatMessagesWithSupabase";
-import { Loader2 } from "lucide-react";
+import { Loader2, Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const ChatWithId = () => {
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -74,6 +75,19 @@ const ChatWithId = () => {
           </div>
         ) : (
           <div className="flex-1 flex flex-col h-full">
+            {/* Mobile-only button to open sidebar */}
+            <div className="md:hidden p-2">
+              <Button 
+                onClick={toggleSidebar} 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center"
+              >
+                <Menu className="h-4 w-4 mr-2" />
+                Menu
+              </Button>
+            </div>
+          
             <ChatMessagesArea 
               messages={messages}
               onApproveCommand={handleApproveCommand}
