@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +27,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 
 const Connections = () => {
   const { profile, user } = useAuth();
@@ -44,7 +43,7 @@ const Connections = () => {
   });
 
   // Redirect to login if not authenticated
-  React.useEffect(() => {
+  useEffect(() => {
     if (!user) {
       navigate('/auth');
     }
@@ -147,7 +146,7 @@ const Connections = () => {
         return obj;
       }, {} as Record<string, string>);
       
-      // Save to Supabase (this would need a 'connections' table to be created)
+      // Save to Supabase
       const { error } = await supabase
         .from('connections')
         .upsert({
