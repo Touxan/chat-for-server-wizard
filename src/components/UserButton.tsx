@@ -8,7 +8,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, User, LogOut } from "lucide-react";
+import { Settings, User, LogOut, Link } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -17,15 +17,15 @@ export function UserButton() {
   const navigate = useNavigate();
   
   const handleProfileClick = () => {
-    // Pour l'instant, nous allons simplement naviguer vers la page de profil
-    // que nous pourrons implémenter plus tard
     navigate('/profile');
   };
   
   const handleSettingsClick = () => {
-    // Pour l'instant, nous allons simplement naviguer vers la page de paramètres
-    // que nous pourrons implémenter plus tard
     navigate('/settings');
+  };
+
+  const handleConnectionClick = () => {
+    navigate('/connections');
   };
 
   return (
@@ -45,7 +45,7 @@ export function UserButton() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 bg-[hsl(var(--popover))] border-[hsl(var(--border))]" align="end" forceMount>
         <DropdownMenuLabel className="text-[hsl(var(--foreground))]">
-          {profile ? `${profile.first_name} ${profile.last_name}` : 'Mon Compte'}
+          {profile ? `${profile.first_name} ${profile.last_name}` : 'My Account'}
         </DropdownMenuLabel>
         {profile && (
           <DropdownMenuLabel className="text-xs text-[hsl(var(--foreground-muted))]">
@@ -58,14 +58,21 @@ export function UserButton() {
           className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]"
         >
           <User className="mr-2 h-4 w-4" />
-          <span>Profil</span>
+          <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={handleConnectionClick}
+          className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]"
+        >
+          <Link className="mr-2 h-4 w-4" />
+          <span>Connections</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={handleSettingsClick}
           className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]"
         >
           <Settings className="mr-2 h-4 w-4" />
-          <span>Paramètres</span>
+          <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-[hsl(var(--border))]" />
         <DropdownMenuItem 
@@ -73,7 +80,7 @@ export function UserButton() {
           className="text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent))] focus:bg-[hsl(var(--accent))]"
         >
           <LogOut className="mr-2 h-4 w-4" />
-          <span>Déconnexion</span>
+          <span>Logout</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
