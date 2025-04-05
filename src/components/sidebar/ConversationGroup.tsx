@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronRight, FolderIcon, Terminal, MoreHorizontal, Edit, Trash2, Check, X } from "lucide-react";
+import { ChevronDown, ChevronRight, FolderIcon, Terminal, MoreHorizontal, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -33,6 +33,33 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
   // State for inline editing
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Set up click outside listener for auto-save
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (inputRef.current && !inputRef.current.contains(event.target as Node) && editingId) {
+        if (editingTitle.trim()) {
+          // Auto-save when clicking outside if we have a valid title
+          openRenameDialog({ id: editingId, title: editingTitle }, event as any);
+        }
+        setEditingId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [editingId, editingTitle, openRenameDialog]);
+
+  // When editing starts, focus the input
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
 
   const handleStartEdit = (chat: any, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -40,15 +67,12 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
     setEditingTitle(chat.title);
   };
 
-  const handleCancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setEditingId(null);
-  };
-
-  const handleSaveEdit = (chat: any, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (editingTitle.trim()) {
-      openRenameDialog({ ...chat, title: editingTitle }, e);
+  // Handle Enter key to save
+  const handleKeyDown = (chat: any, e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && editingTitle.trim()) {
+      openRenameDialog({ ...chat, title: editingTitle }, e as any);
+      setEditingId(null);
+    } else if (e.key === 'Escape') {
       setEditingId(null);
     }
   };
@@ -71,31 +95,19 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
           {group.chats.map((chat) => (
             <div key={chat.id} className="flex group">
               {editingId === chat.id ? (
-                // Editing mode
-                <div className="flex-1 flex items-center bg-[hsl(var(--sidebar-hover))] rounded-sm px-2 py-1">
+                // Editing mode - improved styling
+                <div
+                  className="flex-1 flex items-center bg-[hsl(var(--sidebar-hover))/30] rounded-sm px-2 py-1 border border-[hsl(var(--primary))/30]"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Input
+                    ref={inputRef}
                     value={editingTitle}
                     onChange={(e) => setEditingTitle(e.target.value)}
-                    autoFocus
-                    className="h-7 text-sm"
-                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => handleKeyDown(chat, e)}
+                    className="h-7 text-sm bg-transparent border-none focus-visible:ring-0 p-0 text-[hsl(var(--sidebar-text))] placeholder:text-[hsl(var(--sidebar-text))/50]"
+                    autoComplete="off"
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 ml-1"
-                    onClick={(e) => handleSaveEdit(chat, e)}
-                  >
-                    <Check className="h-4 w-4 text-green-500" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6"
-                    onClick={handleCancelEdit}
-                  >
-                    <X className="h-4 w-4 text-red-500" />
-                  </Button>
                 </div>
               ) : (
                 // Display mode
