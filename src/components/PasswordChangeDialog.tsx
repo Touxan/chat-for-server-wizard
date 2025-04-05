@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -57,14 +58,11 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.updateUser(
-        {
-          password: newPassword,
-        },
-        {
-          persistSession: true
-        }
-      );
+      // The updateUser method only accepts emailRedirectTo as an option
+      // We don't need to pass persistSession here as it's a client configuration
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
 
       if (error) throw error;
 
