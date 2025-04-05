@@ -1,8 +1,9 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronRight, FolderIcon, Terminal, MoreHorizontal, Edit, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, FolderIcon, Terminal, MoreHorizontal, Edit, Trash2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { GroupedConversations } from "@/hooks/conversation/useGroupConversations";
 import { useNavigate, useParams } from "react-router-dom";
@@ -28,6 +29,29 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
 }) => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
+  
+  // State for inline editing
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingTitle, setEditingTitle] = useState("");
+
+  const handleStartEdit = (chat: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(chat.id);
+    setEditingTitle(chat.title);
+  };
+
+  const handleCancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setEditingId(null);
+  };
+
+  const handleSaveEdit = (chat: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (editingTitle.trim()) {
+      openRenameDialog({ ...chat, title: editingTitle }, e);
+      setEditingId(null);
+    }
+  };
 
   return (
     <Collapsible key={index} defaultOpen={index < 2}>
@@ -46,54 +70,86 @@ const ConversationGroup: React.FC<ConversationGroupProps> = ({
         <div className="ml-6 space-y-1">
           {group.chats.map((chat) => (
             <div key={chat.id} className="flex group">
-              <Button
-                variant="ghost"
-                className={cn(
-                  "flex-1 justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm",
-                  chat.id === conversationId && "bg-[hsl(var(--sidebar-hover))] text-[hsl(var(--sidebar-text))]"
-                )}
-                onClick={() => navigate(`/chat/${chat.id}`)}
-              >
-                <Terminal className="mr-2 h-4 w-4 text-[hsl(var(--primary))]" />
-                <div className="flex-1 overflow-hidden">
-                  <div className="truncate">{chat.title}</div>
-                  <p className="text-xs text-[hsl(var(--sidebar-text))/60]">
-                    {new Date(chat.created_at).toLocaleDateString()}
-                  </p>
+              {editingId === chat.id ? (
+                // Editing mode
+                <div className="flex-1 flex items-center bg-[hsl(var(--sidebar-hover))] rounded-sm px-2 py-1">
+                  <Input
+                    value={editingTitle}
+                    onChange={(e) => setEditingTitle(e.target.value)}
+                    autoFocus
+                    className="h-7 text-sm"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 ml-1"
+                    onClick={(e) => handleSaveEdit(chat, e)}
+                  >
+                    <Check className="h-4 w-4 text-green-500" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                    onClick={handleCancelEdit}
+                  >
+                    <X className="h-4 w-4 text-red-500" />
+                  </Button>
                 </div>
-              </Button>
-              
-              <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      className="hover:bg-[hsl(var(--sidebar-hover))]"
-                      onClick={(e) => e.stopPropagation()} // Prevent navigation
-                    >
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
-                      onClick={(e: any) => openRenameDialog(chat, e)}
-                      className="cursor-pointer"
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Rename
-                    </DropdownMenuItem>
-                    
-                    <DropdownMenuItem
-                      onClick={(e: any) => openDeleteDialog(chat.id, e)}
-                      className="text-red-500 focus:text-red-500 cursor-pointer"
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
+              ) : (
+                // Display mode
+                <>
+                  <Button
+                    variant="ghost"
+                    className={cn(
+                      "flex-1 justify-start text-left font-mono text-sm text-[hsl(var(--sidebar-text))/80] hover:bg-[hsl(var(--sidebar-hover))] hover:text-[hsl(var(--sidebar-text))] rounded-sm",
+                      chat.id === conversationId && "bg-[hsl(var(--sidebar-hover))] text-[hsl(var(--sidebar-text))]"
+                    )}
+                    onClick={() => navigate(`/chat/${chat.id}`)}
+                  >
+                    <Terminal className="mr-2 h-4 w-4 text-[hsl(var(--primary))]" />
+                    <div className="flex-1 overflow-hidden">
+                      <div className="truncate">{chat.title}</div>
+                      <p className="text-xs text-[hsl(var(--sidebar-text))/60]">
+                        {new Date(chat.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </Button>
+                  
+                  <div className="flex opacity-0 group-hover:opacity-100 transition-opacity">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="hover:bg-[hsl(var(--sidebar-hover))]"
+                          onClick={(e) => e.stopPropagation()} // Prevent navigation
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={(e) => handleStartEdit(chat, e)}
+                          className="cursor-pointer"
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Rename
+                        </DropdownMenuItem>
+                        
+                        <DropdownMenuItem
+                          onClick={(e) => openDeleteDialog(chat.id, e)}
+                          className="text-red-500 focus:text-red-500 cursor-pointer"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>

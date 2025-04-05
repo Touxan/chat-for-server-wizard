@@ -8,7 +8,6 @@ import { useNavigate, useLocation } from "react-router-dom";
 // Import our new components
 import NewConversationButton from "./sidebar/NewConversationButton";
 import ConversationList from "./sidebar/ConversationList";
-import RenameDialog from "./sidebar/RenameDialog";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,9 +18,6 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
-  const [newTitle, setNewTitle] = useState("");
-  const [editingConversationId, setEditingConversationId] = useState<string | null>(null);
 
   const handleNewChat = async () => {
     const newConversation = await addConversation("New conversation");
@@ -55,23 +51,11 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
     }
   };
   
-  const handleRenameConversation = () => {
-    if (editingConversationId && newTitle.trim()) {
-      renameConversation(editingConversationId, newTitle);
-      setEditingConversationId(null);
-      setNewTitle("");
-    }
-  };
-  
-  const openRenameDialog = (chat: any, e: React.MouseEvent) => {
+  const handleRenameConversation = (chat: any, e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent navigation when clicking rename
-    setEditingConversationId(chat.id);
-    setNewTitle(chat.title);
-  };
-
-  const closeRenameDialog = () => {
-    setEditingConversationId(null);
-    setNewTitle("");
+    if (chat.id && chat.title) {
+      renameConversation(chat.id, chat.title);
+    }
   };
 
   return (
@@ -96,20 +80,11 @@ const Sidebar = forwardRef<HTMLDivElement, SidebarProps>(({ isOpen }, ref) => {
             user={user}
             isLoading={isLoading}
             groupedConversations={groupedConversations}
-            openRenameDialog={openRenameDialog}
+            openRenameDialog={handleRenameConversation}
             openDeleteDialog={handleDeleteConversation}
           />
         </div>
       </div>
-
-      {/* Dialogs */}
-      <RenameDialog 
-        isOpen={!!editingConversationId}
-        onClose={closeRenameDialog}
-        newTitle={newTitle}
-        onTitleChange={setNewTitle}
-        onRename={handleRenameConversation}
-      />
     </div>
   );
 });
