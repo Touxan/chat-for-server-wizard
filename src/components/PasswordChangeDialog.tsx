@@ -14,6 +14,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface PasswordChangeDialogProps {
   open: boolean;
@@ -26,6 +28,8 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
   const resetForm = () => {
     setCurrentPassword("");
@@ -68,11 +72,17 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
 
       toast({
         title: "Success",
-        description: "Your password has been updated successfully.",
+        description: "Your password has been updated successfully. Please sign in again.",
       });
       
       resetForm();
       onOpenChange(false);
+      
+      // Sign out the user and redirect to auth page
+      setTimeout(async () => {
+        await signOut();
+        navigate('/auth');
+      }, 1500);
     } catch (error: any) {
       toast({
         variant: "destructive",
