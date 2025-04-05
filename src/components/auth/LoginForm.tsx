@@ -16,7 +16,12 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Lock } from "lucide-react";
+import { Lock, ArrowRight } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -33,6 +38,7 @@ interface LoginFormProps {
 const LoginForm = ({ isLoading, onSubmit }: LoginFormProps) => {
   const [resetEmail, setResetEmail] = useState("");
   const [isResetting, setIsResetting] = useState(false);
+  const [isResetOpen, setIsResetOpen] = useState(false);
   const { toast } = useToast();
   
   const loginForm = useForm<LoginFormValues>({
@@ -43,7 +49,8 @@ const LoginForm = ({ isLoading, onSubmit }: LoginFormProps) => {
     },
   });
 
-  const handleResetPassword = async () => {
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!resetEmail || !resetEmail.includes('@')) {
       toast({
         variant: "destructive",
@@ -66,6 +73,7 @@ const LoginForm = ({ isLoading, onSubmit }: LoginFormProps) => {
         description: "Check your email for a link to reset your password.",
       });
       setResetEmail("");
+      setIsResetOpen(false);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -115,29 +123,49 @@ const LoginForm = ({ isLoading, onSubmit }: LoginFormProps) => {
         </form>
       </Form>
 
-      <div className="space-y-4 border-t pt-4">
-        <h3 className="text-sm font-medium">Forgot your password?</h3>
-        <div className="flex gap-2">
-          <Input
-            placeholder="Enter your email"
-            type="email"
-            value={resetEmail}
-            onChange={(e) => setResetEmail(e.target.value)}
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={handleResetPassword}
-            disabled={isResetting}
-            className="flex-shrink-0"
-          >
-            <Lock className="h-4 w-4" />
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Enter your email address and we'll send you a link to reset your password.
-        </p>
+      <div className="space-y-2 border-t pt-4">
+        <Collapsible
+          open={isResetOpen}
+          onOpenChange={setIsResetOpen}
+          className="w-full"
+        >
+          <CollapsibleTrigger asChild>
+            <Button variant="link" className="w-full p-0 h-auto">
+              <span className="flex items-center text-sm text-muted-foreground hover:text-primary">
+                Forgot your password?
+                <ArrowRight className={`ml-1 h-3 w-3 transition-transform ${isResetOpen ? 'rotate-90' : ''}`} />
+              </span>
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="mt-4 space-y-4">
+            <form onSubmit={handleResetPassword} className="space-y-3">
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <Input
+                  placeholder="Enter your email"
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <Button
+                  type="submit"
+                  variant="outline"
+                  size="sm"
+                  disabled={isResetting}
+                  className="flex items-center gap-2"
+                >
+                  <Lock className="h-3.5 w-3.5" />
+                  {isResetting ? "Sending..." : "Reset Password"}
+                </Button>
+              </div>
+            </form>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );

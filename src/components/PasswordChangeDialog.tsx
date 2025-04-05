@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Dialog,
@@ -58,10 +57,14 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     setIsLoading(true);
 
     try {
-      // Update password through Supabase
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      const { error } = await supabase.auth.updateUser(
+        {
+          password: newPassword,
+        },
+        {
+          persistSession: true
+        }
+      );
 
       if (error) throw error;
 
