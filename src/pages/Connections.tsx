@@ -3,7 +3,7 @@ import React from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link2, Plus, Github, Google, Twitter } from "lucide-react";
+import { Link2, Plus, Github, Mail, MessageSquare } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,8 +22,8 @@ const Connections = () => {
   // Mock data for connections since we don't have actual connections yet
   const connections = [
     { id: 1, type: 'github', connected: false, icon: Github },
-    { id: 2, type: 'google', connected: false, icon: Google },
-    { id: 3, type: 'twitter', connected: false, icon: Twitter },
+    { id: 2, type: 'email', connected: false, icon: Mail },
+    { id: 3, type: 'chat', connected: false, icon: MessageSquare },
   ];
 
   const handleConnect = (type: string) => {
