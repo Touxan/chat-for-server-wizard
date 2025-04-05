@@ -11,7 +11,8 @@ const Connections = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
   const { 
-    currentConnection,
+    currentConnectionType,
+    currentProvider,
     isDialogOpen,
     isSubmitting,
     credentials,
@@ -19,7 +20,8 @@ const Connections = () => {
     handleConnect,
     handleSaveCredentials,
     handleInputChange,
-    findConnectionByType
+    findConnectionByType,
+    findProviderById
   } = useConnections();
 
   // Redirect to login if not authenticated
@@ -30,7 +32,12 @@ const Connections = () => {
   }, [user, navigate]);
 
   // Find the current connection config
-  const currentConnectionConfig = findConnectionByType(connectionTypes, currentConnection);
+  const currentConnectionConfig = findConnectionByType(connectionTypes, currentConnectionType);
+  
+  // Find the current provider
+  const currentProviderConfig = currentConnectionConfig 
+    ? findProviderById(currentConnectionConfig, currentProvider)
+    : null;
 
   // Handler for saving credentials that uses the connection types
   const saveCredentials = () => handleSaveCredentials(connectionTypes);
@@ -52,7 +59,7 @@ const Connections = () => {
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col">
         {connectionTypes.map((connection) => (
           <ConnectionCard
             key={connection.id}
@@ -66,7 +73,8 @@ const Connections = () => {
       <CredentialsDialog
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        currentConnection={currentConnectionConfig}
+        connectionType={currentConnectionConfig}
+        provider={currentProviderConfig}
         credentials={credentials}
         onCredentialsChange={handleInputChange}
         onSave={saveCredentials}

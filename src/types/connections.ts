@@ -7,13 +7,21 @@ export type ConnectionCredentials = {
   endpoint: string;
 };
 
+// Define a provider structure
+export type Provider = {
+  id: string;
+  name: string;
+  logo: React.ElementType;
+  status: 'available' | 'coming soon';
+};
+
 // Define the connection type structure
 export type ConnectionType = {
   id: number;
   type: string;
   name: string;
   description: string;
-  status: 'available' | 'coming soon';
   icon: React.ElementType;
+  providers: Provider[];
   fields: Array<keyof ConnectionCredentials>;
 };

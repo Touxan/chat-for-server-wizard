@@ -2,13 +2,14 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { ConnectionCredentials, ConnectionType } from "@/types/connections";
+import { ConnectionCredentials, ConnectionType, Provider } from "@/types/connections";
 import { supabase } from "@/integrations/supabase/client";
 
 export const useConnections = () => {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [currentConnection, setCurrentConnection] = useState<string | null>(null);
+  const [currentConnectionType, setCurrentConnectionType] = useState<string | null>(null);
+  const [currentProvider, setCurrentProvider] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [credentials, setCredentials] = useState<ConnectionCredentials>({
@@ -19,18 +20,23 @@ export const useConnections = () => {
   });
 
   // Handle opening the connection dialog
-  const handleConnect = (type: string) => {
-    const connectionConfig = findConnectionByType(type);
+  const handleConnect = (connectionString: string) => {
+    // Parse connection string (format: "type:provider")
+    const [type, provider] = connectionString.split(':');
     
-    if (connectionConfig?.status === 'coming soon') {
+    const connectionConfig = findConnectionByType(type);
+    const providerConfig = connectionConfig ? findProviderById(connectionConfig, provider) : null;
+    
+    if (providerConfig?.status === 'coming soon') {
       toast({
         title: "Coming Soon",
-        description: `The ${connectionConfig.name} connection is not yet available.`,
+        description: `${providerConfig.name} is not yet available.`,
       });
       return;
     }
 
-    setCurrentConnection(type);
+    setCurrentConnectionType(type);
+    setCurrentProvider(provider);
     setIsDialogOpen(true);
     setCredentials({
       apiKey: "",
@@ -43,9 +49,14 @@ export const useConnections = () => {
   // Find a connection by its type
   const findConnectionByType = (type: string | null): ConnectionType | null => {
     if (!type) return null;
-    
     // This will be provided by the component using this hook
     return null;
+  };
+
+  // Find a provider by its ID within a connection type
+  const findProviderById = (connection: ConnectionType, providerId: string | null): Provider | null => {
+    if (!providerId) return null;
+    return connection.providers.find(p => p.id === providerId) || null;
   };
 
   // Handle saving credentials
@@ -55,7 +66,7 @@ export const useConnections = () => {
     setIsSubmitting(true);
     
     // Get the current connection configuration
-    const connectionConfig = connectionTypes.find(c => c.type === currentConnection);
+    const connectionConfig = connectionTypes.find(c => c.type === currentConnectionType);
     if (!connectionConfig) return;
     
     try {
@@ -69,16 +80,18 @@ export const useConnections = () => {
       const { error } = await supabase.functions.invoke("insert_connection", {
         body: {
           p_user_id: user.id,
-          p_type: currentConnection,
+          p_type: `${currentConnectionType}:${currentProvider}`,
           p_credentials: credentialsToSave
         }
       });
         
       if (error) throw error;
       
+      const providerName = connectionConfig.providers.find(p => p.id === currentProvider)?.name || '';
+      
       toast({
         title: "Connection Saved",
-        description: `Your ${connectionConfig.name} connection has been saved successfully.`,
+        description: `Your ${providerName} connection has been saved successfully.`,
       });
       
       setIsDialogOpen(false);
@@ -86,7 +99,7 @@ export const useConnections = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || `Failed to save ${currentConnection} connection.`,
+        description: error.message || `Failed to save connection.`,
       });
     } finally {
       setIsSubmitting(false);
@@ -103,7 +116,8 @@ export const useConnections = () => {
   };
 
   return {
-    currentConnection,
+    currentConnectionType,
+    currentProvider,
     isDialogOpen,
     isSubmitting,
     credentials,
@@ -114,6 +128,10 @@ export const useConnections = () => {
     findConnectionByType: (connections: ConnectionType[], type: string | null) => {
       if (!type) return null;
       return connections.find(c => c.type === type) || null;
+    },
+    findProviderById: (connection: ConnectionType | null, providerId: string | null) => {
+      if (!connection || !providerId) return null;
+      return connection.providers.find(p => p.id === providerId) || null;
     }
   };
 };

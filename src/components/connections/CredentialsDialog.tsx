@@ -11,12 +11,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { ConnectionType, ConnectionCredentials } from "@/types/connections";
+import { ConnectionType, ConnectionCredentials, Provider } from "@/types/connections";
 
 interface CredentialsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  currentConnection: ConnectionType | null;
+  connectionType: ConnectionType | null;
+  provider: Provider | null;
   credentials: ConnectionCredentials;
   onCredentialsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSave: () => void;
@@ -26,28 +27,29 @@ interface CredentialsDialogProps {
 export const CredentialsDialog = ({
   isOpen,
   onOpenChange,
-  currentConnection,
+  connectionType,
+  provider,
   credentials,
   onCredentialsChange,
   onSave,
   isSubmitting,
 }: CredentialsDialogProps) => {
-  if (!currentConnection) return null;
+  if (!connectionType || !provider) return null;
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            Connect to {currentConnection.name}
+            Connect to {provider.name}
           </DialogTitle>
           <DialogDescription>
-            Provide the necessary credentials to connect your {currentConnection.name.toLowerCase()}
+            Provide the necessary credentials to connect your {provider.name} {connectionType.name.toLowerCase()}
           </DialogDescription>
         </DialogHeader>
         
         <div className="grid gap-4 py-4">
-          {currentConnection.fields.map((field) => (
+          {connectionType.fields.map((field) => (
             <div key={field} className="grid gap-2">
               <Label htmlFor={field} className="capitalize">{field.replace(/([A-Z])/g, ' $1').trim()}</Label>
               <Input
