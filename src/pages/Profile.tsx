@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,11 +9,13 @@ import { User, Building, Mail, Calendar, MessageSquare, Lock } from "lucide-reac
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import PasswordChangeDialog from "@/components/PasswordChangeDialog";
 
 const Profile = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   // Redirect to login if not authenticated
   React.useEffect(() => {
@@ -27,10 +29,7 @@ const Profile = () => {
   };
 
   const handleChangePassword = () => {
-    toast({
-      title: "Password Change",
-      description: "This would open a password change form if implemented.",
-    });
+    setPasswordDialogOpen(true);
   };
 
   if (!profile) {
@@ -124,6 +123,11 @@ const Profile = () => {
           </CardContent>
         </Card>
       </div>
+
+      <PasswordChangeDialog
+        open={passwordDialogOpen}
+        onOpenChange={setPasswordDialogOpen}
+      />
     </div>
   );
 };
