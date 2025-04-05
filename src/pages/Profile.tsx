@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { User, Building, Mail, Calendar } from "lucide-react";
+import { User, Building, Mail, Calendar, MessageSquare, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Redirect to login if not authenticated
   React.useEffect(() => {
@@ -18,6 +21,17 @@ const Profile = () => {
       navigate('/auth');
     }
   }, [user, navigate]);
+
+  const handleReturnToChat = () => {
+    navigate('/chat');
+  };
+
+  const handleChangePassword = () => {
+    toast({
+      title: "Password Change",
+      description: "This would open a password change form if implemented.",
+    });
+  };
 
   if (!profile) {
     return (
@@ -44,7 +58,7 @@ const Profile = () => {
             </Avatar>
             <div>
               <CardTitle className="text-2xl">{profile.first_name} {profile.last_name}</CardTitle>
-              <CardDescription>Account ID: {profile.id.substring(0, 8)}...</CardDescription>
+              <CardDescription>{profile.email}</CardDescription>
             </div>
           </CardHeader>
           <CardContent>
@@ -83,6 +97,28 @@ const Profile = () => {
                     </span>
                   </div>
                 </div>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-between">
+                <Button 
+                  variant="outline" 
+                  onClick={handleReturnToChat}
+                  className="flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Return to Chat
+                </Button>
+                
+                <Button 
+                  variant="outline" 
+                  onClick={handleChangePassword}
+                  className="flex items-center gap-2"
+                >
+                  <Lock className="h-4 w-4" />
+                  Change Password
+                </Button>
               </div>
             </div>
           </CardContent>
