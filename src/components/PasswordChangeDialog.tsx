@@ -40,8 +40,8 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     if (newPassword !== confirmPassword) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Les nouveaux mots de passe ne correspondent pas.",
+        title: "Error",
+        description: "New passwords do not match.",
       });
       return;
     }
@@ -49,8 +49,8 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     if (newPassword.length < 6) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: "Le nouveau mot de passe doit contenir au moins 6 caractères.",
+        title: "Error",
+        description: "New password must be at least 6 characters long.",
       });
       return;
     }
@@ -66,8 +66,8 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
       if (error) throw error;
 
       toast({
-        title: "Succès",
-        description: "Votre mot de passe a été mis à jour avec succès.",
+        title: "Success",
+        description: "Your password has been updated successfully.",
       });
       
       resetForm();
@@ -75,8 +75,8 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Erreur",
-        description: error.message || "Une erreur est survenue lors de la mise à jour du mot de passe.",
+        title: "Error",
+        description: error.message || "An error occurred while updating the password.",
       });
     } finally {
       setIsLoading(false);
@@ -90,43 +90,43 @@ const PasswordChangeDialog = ({ open, onOpenChange }: PasswordChangeDialogProps)
     }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Changer votre mot de passe</DialogTitle>
+          <DialogTitle>Change your password</DialogTitle>
           <DialogDescription>
-            Entrez votre nouveau mot de passe ci-dessous.
+            Enter your new password below.
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+            <Label htmlFor="newPassword">New password</Label>
             <Input
               id="newPassword"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="Entrez votre nouveau mot de passe"
+              placeholder="Enter your new password"
               required
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmer le mot de passe</Label>
+            <Label htmlFor="confirmPassword">Confirm password</Label>
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirmez votre nouveau mot de passe"
+              placeholder="Confirm your new password"
               required
             />
           </div>
           
           <DialogFooter className="pt-4">
             <DialogClose asChild>
-              <Button type="button" variant="outline">Annuler</Button>
+              <Button type="button" variant="outline">Cancel</Button>
             </DialogClose>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Chargement..." : "Mettre à jour"}
+              {isLoading ? "Loading..." : "Update"}
             </Button>
           </DialogFooter>
         </form>
