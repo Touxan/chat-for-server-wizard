@@ -24,7 +24,7 @@ export const connectionTypes: ConnectionType[] = [
       { id: 'azure', name: 'Azure', logo: Cloud, status: 'coming soon' },
       { id: 'ovh', name: 'OVH Cloud', logo: Cloud, status: 'coming soon' }
     ],
-    fields: ['apiKey', 'endpoint'] 
+    fields: ['xAuthToken'] 
   },
   { 
     id: 2, 

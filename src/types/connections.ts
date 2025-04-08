@@ -5,6 +5,7 @@ export type ConnectionCredentials = {
   username: string;
   password: string;
   endpoint: string;
+  xAuthToken: string;
 };
 
 // Define a provider structure

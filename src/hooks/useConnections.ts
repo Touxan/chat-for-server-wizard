@@ -16,7 +16,8 @@ export const useConnections = () => {
     apiKey: "",
     username: "",
     password: "",
-    endpoint: ""
+    endpoint: "",
+    xAuthToken: ""
   });
 
   // Handle opening the connection dialog
