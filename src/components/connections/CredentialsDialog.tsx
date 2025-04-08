@@ -49,6 +49,15 @@ export const CredentialsDialog = ({
     return labels[field] || field.replace(/([A-Z])/g, ' $1').trim();
   };
 
+  // Function to get placeholder text based on field and provider
+  const getPlaceholder = (field: keyof ConnectionCredentials, providerId: string) => {
+    if (field === 'xAuthToken' && providerId === 'scaleway') {
+      return '69f3aef1-cb31-4598-82b7-xxxxxxxx';
+    }
+    
+    return `Enter your ${getFieldLabel(field)}`;
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -71,7 +80,7 @@ export const CredentialsDialog = ({
                 type={field.includes('password') ? 'password' : 'text'}
                 value={credentials[field]}
                 onChange={onCredentialsChange}
-                placeholder={field === 'xAuthToken' ? '69f3aef1-xxxx' : `Enter your ${getFieldLabel(field)}`}
+                placeholder={getPlaceholder(field, provider.id)}
               />
             </div>
           ))}

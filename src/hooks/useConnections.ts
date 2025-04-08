@@ -39,11 +39,13 @@ export const useConnections = () => {
     setCurrentConnectionType(type);
     setCurrentProvider(provider);
     setIsDialogOpen(true);
+    // Reset all credential fields
     setCredentials({
       apiKey: "",
       username: "",
       password: "",
-      endpoint: ""
+      endpoint: "",
+      xAuthToken: ""
     });
   };
 
