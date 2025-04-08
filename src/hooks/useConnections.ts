@@ -17,7 +17,8 @@ export const useConnections = () => {
     username: "",
     password: "",
     endpoint: "",
-    xAuthToken: ""
+    xAuthToken: "",
+    sshPrivateKey: ""
   });
 
   // Handle opening the connection dialog
@@ -45,7 +46,8 @@ export const useConnections = () => {
       username: "",
       password: "",
       endpoint: "",
-      xAuthToken: ""
+      xAuthToken: "",
+      sshPrivateKey: ""
     });
   };
 
@@ -110,7 +112,7 @@ export const useConnections = () => {
   };
 
   // Handle change in input fields
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setCredentials(prev => ({
       ...prev,

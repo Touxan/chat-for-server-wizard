@@ -6,6 +6,7 @@ export type ConnectionCredentials = {
   password: string;
   endpoint: string;
   xAuthToken: string;
+  sshPrivateKey: string;
 };
 
 // Define a provider structure

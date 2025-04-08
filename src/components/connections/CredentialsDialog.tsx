@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ConnectionType, ConnectionCredentials, Provider } from "@/types/connections";
 
 interface CredentialsDialogProps {
@@ -19,7 +20,7 @@ interface CredentialsDialogProps {
   connectionType: ConnectionType | null;
   provider: Provider | null;
   credentials: ConnectionCredentials;
-  onCredentialsChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onCredentialsChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   onSave: () => void;
   isSubmitting: boolean;
 }
@@ -43,7 +44,8 @@ export const CredentialsDialog = ({
       username: "Username",
       password: "Password",
       endpoint: "Endpoint URL",
-      xAuthToken: "X-Auth-Token"
+      xAuthToken: "X-Auth-Token",
+      sshPrivateKey: "SSH Private Key"
     };
     
     return labels[field] || field.replace(/([A-Z])/g, ' $1').trim();
@@ -52,10 +54,19 @@ export const CredentialsDialog = ({
   // Function to get placeholder text based on field and provider
   const getPlaceholder = (field: keyof ConnectionCredentials, providerId: string) => {
     if (field === 'xAuthToken' && providerId === 'scaleway') {
-      return '69f3aef1-cb31-4598-82b7-xxxxxxxx';
+      return '69f3aef1-cb31-4598-82b7-zz5eea02df72';
+    }
+    
+    if (field === 'sshPrivateKey' && providerId === 'linux') {
+      return '-----BEGIN RSA PRIVATE KEY-----\nYour private key content here\n-----END RSA PRIVATE KEY-----';
     }
     
     return `Enter your ${getFieldLabel(field)}`;
+  };
+
+  // Function to determine if we should use a textarea for this field
+  const isTextareaField = (field: keyof ConnectionCredentials): boolean => {
+    return field === 'sshPrivateKey';
   };
 
   return (
@@ -74,14 +85,26 @@ export const CredentialsDialog = ({
           {connectionType.fields.map((field) => (
             <div key={field} className="grid gap-2">
               <Label htmlFor={field}>{getFieldLabel(field)}</Label>
-              <Input
-                id={field}
-                name={field}
-                type={field.includes('password') ? 'password' : 'text'}
-                value={credentials[field]}
-                onChange={onCredentialsChange}
-                placeholder={getPlaceholder(field, provider.id)}
-              />
+              {isTextareaField(field) ? (
+                <Textarea
+                  id={field}
+                  name={field}
+                  value={credentials[field]}
+                  onChange={onCredentialsChange}
+                  placeholder={getPlaceholder(field, provider.id)}
+                  rows={6}
+                  className="font-mono text-sm"
+                />
+              ) : (
+                <Input
+                  id={field}
+                  name={field}
+                  type={field.includes('password') ? 'password' : 'text'}
+                  value={credentials[field]}
+                  onChange={onCredentialsChange}
+                  placeholder={getPlaceholder(field, provider.id)}
+                />
+              )}
             </div>
           ))}
         </div>
